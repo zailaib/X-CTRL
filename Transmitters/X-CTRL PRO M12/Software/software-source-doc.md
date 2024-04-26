@@ -230,3 +230,8 @@
    > 14 **lv_settings.h**：这个文件可能是 LittlevGL（LVGL）图形库的设置相关的头文件。它可能包含了 LVGL 图形库的配置参数和宏定义等，用于进行具体的图形库设置和配置。
 
 5. **Model**：这个文件夹可能包含了与数据模型相关的代码或定义。它可能包含了数据结构的定义、业务逻辑的实现、数据处理的函数等，用于在项目中处理和管理数据模型。
+
+## 参考文档
+
+> [总线 / I2C总线 / (SCL/SDA)](https://www.cnblogs.com/deliweier-wangshuping/p/16167870.html)
+> [I2C总线协议](https://www.cnblogs.com/deliweier-wangshuping/p/16228208.html)
