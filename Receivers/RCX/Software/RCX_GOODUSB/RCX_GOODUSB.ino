@@ -15,7 +15,7 @@ void setup()
   StorageDataReg(Sim_ObjectSelect);
   EEPROM_Handle(EEPROM_Chs::ReadData);
 
- // 初始化设备
+  // 初始化设备
   Sim_DeviceInit();
 
   // 设置引脚模式
@@ -40,22 +40,28 @@ void setup()
   }
 
   while (!RCX::Handshake::Process())
-  {
+  { // 初始化过程中过如果 只要握手不成功 则进入这里 闪烁LED 直到握手成功
     __IntervalExecute(togglePin(LED_Pin), 2000);
   }
 
+  // 看门狗初始化 定期喂狗（refresh），以防止看门狗超时发生，从而触发系统复位
+  // IWDG_PRE_64 是一个常量或枚举值，表示预分频器的分频系数 = 1/64 
+  // 625 喂狗的时间间隔
   iwdg_init(IWDG_PRE_64, 625);
 }
 
+// Sim -> simulation 模拟的意思
+
 void loop()
 {
+  // condition ? expression1 : expression2
   UseMtm ? mtm.Running(millis()) : Sim_DeviceProcess();
-  iwdg_feed();
+  iwdg_feed(); // 循环喂狗
 }
 
 static void When_KeyPressEvent()
 {
-  Sim_SetNextObj();
+  Sim_SetNextObj(); // 按键选择模拟哪种设备
   EEPROM_Handle(EEPROM_Chs::SaveData);
   NVIC_SystemReset(); // 软件复位
 }
