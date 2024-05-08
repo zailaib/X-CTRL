@@ -21,7 +21,7 @@ Upgrade 2019.3.26  v2.6 将MISO引脚配置成浮空输入
 Upgrade 2019.7.8   v2.7 添加掉电模式
 Upgrade 2019.9.7   v2.8 修复NRF初始化失败，更新TranRecvSafe、IsDetect函数
 Upgrade 2019.9.16  v2.9 添加射频使能控制，调整SPI读写寄存器函数使用权限
-Upgrade 2020.1.3   v3.0 分离半双工通信功能，添加FHSS功能支持 
+Upgrade 2020.1.3   v3.0 分离半双工通信功能，添加FHSS功能支持
 **************************************************************************************************/
 
 #ifndef __NRF_H
@@ -33,7 +33,7 @@ Upgrade 2020.1.3   v3.0 分离半双工通信功能，添加FHSS功能支持
 #include "NRF_Reg.h"
 
 /*取消注释以支持硬件SPI方式*/
-//#define NRF_SPI_OBJECT SPI
+// #define NRF_SPI_OBJECT SPI
 
 #ifdef NRF_SPI_OBJECT
 #include "SPI.h"
@@ -41,36 +41,35 @@ Upgrade 2020.1.3   v3.0 分离半双工通信功能，添加FHSS功能支持
 
 namespace NRF_Port
 {
-#if defined (__AVR__)
-typedef volatile uint8_t PortReg_t;
-typedef uint8_t PortMask_t;
+#if defined(__AVR__)
+    typedef volatile uint8_t PortReg_t;
+    typedef uint8_t PortMask_t;
 #define USE_FAST_IO
 #elif defined(__STM32__)
 #if defined(__STM32F0__)
-typedef volatile uint16_t PortReg_t;
+    typedef volatile uint16_t PortReg_t;
 #else
-typedef volatile uint32_t PortReg_t;
+    typedef volatile uint32_t PortReg_t;
 #endif
-typedef uint16_t PortMask_t;
+    typedef uint16_t PortMask_t;
 #define USE_FAST_IO
 #endif
-}//end of namespace NRF
+} // end of namespace NRF
 
 /**NRF24L01 引脚分布图(模块正面,俯视)
-  *----------------+-------+
-  *|               |       |
-  *|        _______|_______|
-  *|        |8:IRQ | 7:MISO|
-  *|        |6:MOSI| 5:SCK |
-  *|        |4:CSN | 3:CE  |
-  *|        |2:VCC | 1:GND |
-  *----------------+-------+
-  */
+ *----------------+-------+
+ *|               |       |
+ *|        _______|_______|
+ *|        |8:IRQ | 7:MISO|
+ *|        |6:MOSI| 5:SCK |
+ *|        |4:CSN | 3:CE  |
+ *|        |2:VCC | 1:GND |
+ *----------------+-------+
+ */
 
 class NRF_Basic
 {
 public:
-
     bool hwSPI;
     uint8_t MOSI_Pin, MISO_Pin, SCK_Pin, CE_Pin, CSN_Pin;
     NRF_Basic(uint8_t mosi, uint8_t miso, uint8_t sck, uint8_t ce, uint8_t csn);
@@ -92,17 +91,17 @@ public:
         POWER_m18dBm = B00,
         POWER_m12dBm = B01,
         POWER_m6dBm = B10,
-        POWER_0dBm  = B11
+        POWER_0dBm = B11
     } Power_Type;
-    
+
     typedef enum
     {
-        RX_MODE,  // 接收模式
-        TX_MODE,  // 发送模式
-        TXRX_MODE,// 发送/接收模式(半双工通信，用于主机)
-        RXTX_MODE // 接收/发送模式(半双工通信，用于从机)
-    } Mode_Type;//通信模式选项
-    
+        RX_MODE,   // 接收模式
+        TX_MODE,   // 发送模式
+        TXRX_MODE, // 发送/接收模式(半双工通信，用于主机)
+        RXTX_MODE  // 接收/发送模式(半双工通信，用于从机)
+    } Mode_Type;   // 通信模式选项
+
     typedef enum
     {
         State_RX,
@@ -112,19 +111,18 @@ public:
 
     void SetDefault();
     void SetAddress(uint8_t addr0, uint8_t addr1, uint8_t addr2, uint8_t addr3, uint8_t addr4);
-    void SetAddress(uint8_t* addr);
+    void SetAddress(uint8_t *addr);
     void SetSpeed(Speed_Type speed);
     void SetSpeed(uint8_t speedIndex)
     {
         const Speed_Type speed[] = {
             SPEED_250Kbps,
             SPEED_1Mbps,
-            SPEED_2Mbps
-        };
+            SPEED_2Mbps};
         SetSpeed(speed[speedIndex % 3]);
     }
     void SetFreqency(uint8_t freq);
-    void SetChannel(uint8_t ch){SetFreqency(ch);};
+    void SetChannel(uint8_t ch) { SetFreqency(ch); };
     void SetPower(Power_Type power);
     void SetPayloadWidth(uint8_t tx_payload, uint8_t rx_payload);
     void SetAutoRetry(uint8_t delay, uint8_t count);
@@ -147,17 +145,17 @@ public:
     bool Init();
     bool IsDetect();
     void ClearFlag();
-    void Tran(void* txbuff);
+    void Tran(void *txbuff);
     int8_t TranCheck();
-    bool Recv(void* rxbuff);
+    bool Recv(void *rxbuff);
     void TX_Mode();
     void RX_Mode();
-    
+
     uint8_t SPI_RW(uint8_t Data);
     uint8_t SPI_RW_Reg(uint8_t reg, uint8_t value);
     uint8_t SPI_Read(uint8_t reg);
-    uint8_t SPI_Write_Buf(uint8_t reg, uint8_t* pBuf, uint8_t bytes);
-    uint8_t SPI_Read_Buf(uint8_t reg, uint8_t* pBuf, uint8_t bytes);
+    uint8_t SPI_Write_Buf(uint8_t reg, uint8_t *pBuf, uint8_t bytes);
+    uint8_t SPI_Read_Buf(uint8_t reg, uint8_t *pBuf, uint8_t bytes);
 
     /*预指令*/
     enum COMMAND
@@ -174,7 +172,7 @@ public:
         W_TX_PAYLOAD_NOACK = 0xB0,
         NOP = 0xFF
     };
-    
+
     /*状态标志位*/
     enum STATUS_FLAG
     {
@@ -214,12 +212,12 @@ public:
         FEATURE = 0x1D
     };
 
-    bool    RF_Enabled;
+    bool RF_Enabled;
     uint8_t RF_Freq;
     uint8_t RF_AutoRetryCount;
     uint8_t RF_AutoRetryDelay;
     uint16_t RF_TimeoutUs;
-    uint8_t RF_Address[5];
+    uint8_t RF_Address[5]; // 是一个包含5个元素的 uint8_t 类型的数组，用于存储射频通信中的地址信息。
     uint8_t RF_AddressWidth;
     uint8_t RF_TX_PloadWidth;
     uint8_t RF_RX_PloadWidth;
@@ -232,36 +230,40 @@ public:
     NRF_Port::PortReg_t *mosiport, *misoport, *sckport, *ceport, *csnport;
     NRF_Port::PortMask_t mosipinmask, misopinmask, sckpinmask, cepinmask, csnpinmask;
 #endif
-    
-    NRF_Reg::CONFIG_t     REG_CONFIG;
-    NRF_Reg::EN_AA_t      REG_EN_AA;
-    NRF_Reg::EN_RXADDR_t  REG_EN_RXADDR;
-    NRF_Reg::SETUP_AW_t   REG_SETUP_AW;
+
+    NRF_Reg::CONFIG_t REG_CONFIG;
+    NRF_Reg::EN_AA_t REG_EN_AA;
+    NRF_Reg::EN_RXADDR_t REG_EN_RXADDR;
+    NRF_Reg::SETUP_AW_t REG_SETUP_AW;
     NRF_Reg::SETUP_RETR_t REG_SETUP_RETR;
-    NRF_Reg::RF_CH_t      REG_RF_CH;
-    NRF_Reg::RF_SETUP_t   REG_RF_SETUP;
-    NRF_Reg::STATUS_t     REG_STATUS;
+    NRF_Reg::RF_CH_t REG_RF_CH;
+    NRF_Reg::RF_SETUP_t REG_RF_SETUP;
+    NRF_Reg::STATUS_t REG_STATUS;
     NRF_Reg::OBSERVE_TX_t REG_OBSERVE_TX;
     void UpdateRegs();
 };
 
+// RF_TRM是一个用于处理NRF芯片的传输模块的类或对象。
+// 以便进行传输相关的操作和功能。
 class NRF_TRM
 {
 public:
-    NRF_TRM(NRF_Basic* nrf)
+    NRF_TRM(NRF_Basic *nrf)
     {
         Basic = nrf;
     }
-    void TranRecv(uint8_t* txbuff, uint8_t* rxbuff);
-    void RecvTran(uint8_t* rxbuff, uint8_t* txbuff);
+    void TranRecv(uint8_t *txbuff, uint8_t *rxbuff);
+    void RecvTran(uint8_t *rxbuff, uint8_t *txbuff);
 
-    NRF_Basic* Basic;
+    NRF_Basic *Basic;
 };
 
+// NRF_FHSS是一个用于处理NRF芯片的频率跳频扩频模块的类或对象。
+// 以便进行频率跳频扩频相关的操作和功能
 class NRF_FHSS
 {
 public:
-    NRF_FHSS(NRF_Basic* nrf)
+    NRF_FHSS(NRF_Basic *nrf)
     {
         Basic = nrf;
         FH_Enable = false;
@@ -271,29 +273,29 @@ public:
         InterruptCnt = 0;
         LastInterruptTime = 0;
         LastRxTime = 0;
-        
+
         InterruptTxCnt = 2;
         InterruptTime = 10;
     }
 
-    void SetFreqHoppingList(uint8_t* list, uint16_t length)
+    void SetFreqHoppingList(uint8_t *list, uint16_t length)
     {
         FH_List = list;
         FH_List_Length = length;
     }
-    void TxProcess(uint8_t* txbuff);
-    void TxProcess(uint8_t* txbuff, uint8_t* rxbuff);
-    
-    void RxProcess(uint8_t* rxbuff);
-    void RxProcess(uint8_t* rxbuff, uint8_t* txbuff);
-    
+    void TxProcess(uint8_t *txbuff);
+    void TxProcess(uint8_t *txbuff, uint8_t *rxbuff);
+
+    void RxProcess(uint8_t *rxbuff);
+    void RxProcess(uint8_t *rxbuff, uint8_t *txbuff);
+
     uint8_t InterruptTxCnt;
     uint16_t InterruptTime;
-    
+
 private:
-    NRF_Basic* Basic;
+    NRF_Basic *Basic;
     bool FH_Enable;
-    const uint8_t* FH_List;
+    const uint8_t *FH_List;
     uint16_t FH_List_Length;
     uint16_t FH_List_Index;
     void FH_Process();

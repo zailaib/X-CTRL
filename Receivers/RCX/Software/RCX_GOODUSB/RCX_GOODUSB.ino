@@ -15,7 +15,7 @@ void setup()
   StorageDataReg(Sim_ObjectSelect);
   EEPROM_Handle(EEPROM_Chs::ReadData);
 
-  // 初始化设备
+  // 需要模拟的外设功能内容初始化
   Sim_DeviceInit();
 
   // 设置引脚模式
@@ -30,10 +30,11 @@ void setup()
   // 绑定引脚下降沿到函数用于设置当前的USB设备使用哪种模拟设备（键盘，鼠标，xbox）
   attachInterrupt(KEY_Pin, When_KeyPressEvent, FALLING);
 
+  // 当需要模拟的外设确定了之后 进行无线以及协议的初始化
   Com_Init();
 
   if (UseMtm)
-  {
+  { // 注册任务管理器中使用的函数
     mtm.TaskRegister(TP_NRF_Handler, Task_ComHandler, 10);
     mtm.TaskRegister(TP_Sim, Sim_DeviceProcess, 10);
     mtm.TaskRegister(TP_InfoLED, Task_InfoLED, 500);
@@ -62,6 +63,6 @@ void loop()
 static void When_KeyPressEvent()
 {
   Sim_SetNextObj(); // 按键选择模拟哪种设备
-  EEPROM_Handle(EEPROM_Chs::SaveData);
+  EEPROM_Handle(EEPROM_Chs::SaveData); //
   NVIC_SystemReset(); // 软件复位
 }
