@@ -135,12 +135,12 @@ static void Loop()
 {
   __ExecuteOnce(Com_PassbackInit());
 
-  if (!RCX::RxGetConnected())
+  if (!RCX::RxGetConnected()) // 没有协议链接成功则退出
     return;
 
-  JoystickCtrl();
-  ButtonCtrl();
-  XBox360.send();
+  JoystickCtrl(); // 读摇杆数据 更新 xbox360的控制值
+  ButtonCtrl(); // 读按钮数据 更新 xbox360的控制值 
+  XBox360.send(); // 发送Xbox360的驱动值以使得操纵生效
 }
 
 void XBox360_Reg(uint8_t id)
