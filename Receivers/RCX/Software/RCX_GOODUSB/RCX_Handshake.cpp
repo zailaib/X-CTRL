@@ -54,20 +54,27 @@ static void NRF_ComProcess_Handler()
 }
 
 /**
- * @brief  与主机通信,交换数据
+ * 一个静态函数，返回类型为 void，接受一个指向 Pack_t 类型数据的指针 master 作为参数
+ * @brief  与主机通信,交换数据 (主从 SPI 数据交换)
  * @param  *master:主机握手包指针
  * @retval 无
  */
 static void ComToMaster(Pack_t *master)
 {
+    // 是一个静态变量，它在函数内部保持其值在多次函数调用之间保持持久性
     static uint32_t lastTime;
-    if (millis() - lastTime >= NRF_ComProcess_TimeMs)
+    if (millis() - lastTime >= NRF_ComProcess_TimeMs) // 如果处理时长超过10ms则
     {
         lastTime = millis();
         NRF_ComProcess_Handler();
     }
-    *(Pack_t *)NRF_TxBuff = Slave;
-    *master = *(Pack_t *)NRF_RxBuff;
+
+    // NRF_TxBuff 可能是一个指针或数组，而 *(Pack_t *) 则是类型转换操作，将其解释为指向 Pack_t 类型数据的指针。
+    *(Pack_t *)NRF_TxBuff = Slave; // 将 Slave 的值复制到 NRF_TxBuff 所指向的位置 也就是发送从设备的数据到缓存中
+
+
+    // 一个指针操作，将 NRF_RxBuff 所指向的位置的值复制到 master 指针所指向的位置。
+    *master = *(Pack_t *)NRF_RxBuff; // 读取主设备发过来的数据
 }
 
 /**
