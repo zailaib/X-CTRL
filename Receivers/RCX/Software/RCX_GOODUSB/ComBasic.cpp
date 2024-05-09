@@ -20,9 +20,13 @@ static NRF_TRM nrfTRM(&nrf);
 // 跳帧频率操作对象实例化
 static NRF_FHSS nrfFHSS(&nrf);
 
-uint8_t NRF_RxBuff[32];
+// int 类型 32bit的 buffer数组 接收数据存储位置的数组
+uint8_t NRF_RxBuff[32]; 
+// int 类型 32bit的 buffer数组 发送数据存储位置的数组 
 uint8_t NRF_TxBuff[32];
 
+
+// 定义静态常量字符串指针名为 SlaveName 指针地址存储值为 GOODUSB字符串  
 static const char *SlaveName = "GOODUSB";
 
 void Com_SetDescription(const char *name)

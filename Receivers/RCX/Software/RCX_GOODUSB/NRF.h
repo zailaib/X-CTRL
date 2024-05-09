@@ -32,7 +32,7 @@ Upgrade 2020.1.3   v3.0 分离半双工通信功能，添加FHSS功能支持
 #include "Arduino.h"
 #include "NRF_Reg.h"
 
-/*取消注释以支持硬件SPI方式*/
+/*取消下面这一行注释以支持硬件SPI方式*/
 // #define NRF_SPI_OBJECT SPI
 
 #ifdef NRF_SPI_OBJECT

@@ -16,24 +16,24 @@ namespace RCX
         /*握手命令*/
         typedef enum
         {
-            CMD_None,
-            CMD_AgreeConnect,  /*同意连接*/
-            CMD_AttachConnect, /*绑定连接*/
-            CMD_Disconnect,    /*断开连接*/
-            CMD_ReqConnect,    /*请求连接*/
-            CMD_MAX
+            CMD_None,  /* = 0 */
+            CMD_AgreeConnect,  /*同意连接 = 1 */
+            CMD_AttachConnect, /*绑定连接 = 2 */
+            CMD_Disconnect,    /*断开连接 = 3 */
+            CMD_ReqConnect,    /*请求连接 = 4 */
+            CMD_MAX /* = 5 */
         } CMD_Type;
 
         /*握手状态机*/
         typedef enum
         {
-            State_Idle,       /*空闲*/
-            State_Prepare,    /*准备*/
-            State_Search,     /*搜索*/
-            State_ReqConnect, /*请求连接*/
-            State_ReConnect,  /*重新连接*/
-            State_Connected,  /*连接成功*/
-            State_MAX
+            State_Idle,       /*空闲 = 0 */
+            State_Prepare,    /*准备 = 1 */
+            State_Search,     /*搜索 = 2 */
+            State_ReqConnect, /*请求连接 = 3 */
+            State_ReConnect,  /*重新连接 = 4 */
+            State_Connected,  /*连接成功 = 5 */
+            State_MAX /* = 6 */
         } State_Type;
 
         /*广播头*/
@@ -45,7 +45,11 @@ namespace RCX
             BroadcastHead_SlaveAttach = (uint16_t)0x0F0F
         } BroadcastHead_Type;
 
-/*强制单字节对齐*/
+/*
+强制单字节对齐
+struct 是按照定义时候到顺序存储数据的
+
+*/
 #pragma pack(1)
 
         /*握手数据包格式 32 Bytes*/
@@ -85,7 +89,7 @@ namespace RCX
 
             /*跳频表 10 Bytes*/
             uint8_t FerqList[10];
-        } Pack_t;
+        } Pack_t; // 2+1+10+1+1+1+1+5+10 = 32 Byte = 32 * 8 = 256bit
 
 #pragma pack()
 
