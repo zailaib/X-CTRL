@@ -11,7 +11,7 @@
 #define max(a,b) ((a)>(b)?(a):(b))
 #endif
 
-/******************* ¾ùÖµÂË²¨Æ÷ *******************/
+/******************* å‡å€¼æ»¤æ³¢å™¨ *******************/
 template <class T> class FilterAverage
 {
 public:
@@ -85,7 +85,7 @@ template <class T> T FilterAverage<T>::getNext(T rawIn)
     return total / k;    // divide by number of samples
 }
 
-/******************* ÖÍ»ØÂË²¨Æ÷ *******************/
+/******************* æ»å›æ»¤æ³¢å™¨ *******************/
 template <class T> class FilterHysteresis
 {
 public:
