@@ -1,4 +1,4 @@
-﻿#include "FileGroup.h"
+#include "FileGroup.h"
 #include "ComPrivate.h"
 
 void Task_InfoLED()
