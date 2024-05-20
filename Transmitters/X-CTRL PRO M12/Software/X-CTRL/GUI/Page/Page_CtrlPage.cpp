@@ -2,42 +2,41 @@
 #include "GUI/DisplayPrivate.h"
 #include "Communication/ComPrivate.h"
 
-static lv_obj_t * appWindow;
+static lv_obj_t *appWindow;
 
-static lv_obj_t * tabview;
-static lv_obj_t * tabGrp[3];
-static lv_obj_t * ledGrp[3];
+static lv_obj_t *tabview;
+static lv_obj_t *tabGrp[3];
+static lv_obj_t *ledGrp[3];
 
 #ifndef TAB_JOYSTICK
-/*“°∏À*/
-static lv_obj_t * JoysticksGrp[2];
+/*ÊëáÊùÜ*/
+static lv_obj_t *JoysticksGrp[2];
 static const uint8_t contJs_Size = 74;
 
-/*»˝∂Œø™πÿ*/
-static lv_obj_t * imgSW[4];
+/*‰∏âÊÆµÂºÄÂÖ≥*/
+static lv_obj_t *imgSW[4];
 static int16_t imgSW_MidPos;
 static const uint8_t contSW_Height = 36;
 static const uint8_t contSW_Width = 13;
 
 static void Joystick_Creat(
-    lv_obj_t** joystick,
-    lv_obj_t * par,
-    lv_align_t align, lv_coord_t x_mod, lv_coord_t y_mod
-)
+    lv_obj_t **joystick,
+    lv_obj_t *par,
+    lv_align_t align, lv_coord_t x_mod, lv_coord_t y_mod)
 {
-    lv_obj_t * js = lv_joystick_creat(par, NULL);
-    
+    lv_obj_t *js = lv_joystick_creat(par, NULL);
+
     lv_joystick_set_max_value(js, RCX_CHANNEL_DATA_MAX);
     lv_joystick_set_size(js, contJs_Size);
 
-    /*“°∏À»›∆˜*/
+    /*ÊëáÊùÜÂÆπÂô®*/
     static lv_style_t contFrame_style;
     contFrame_style = lv_style_transp;
     contFrame_style.body.radius = 5;
     lv_joystick_set_style(js, LV_JOYSTICK_STYLE_MAIN, &contFrame_style);
     lv_obj_align(js, par, align, x_mod, y_mod);
 
-    /*“°∏À“∆∂Øµ◊∞Â*/
+    /*ÊëáÊùÜÁßªÂä®Â∫ïÊùø*/
     static lv_style_t contjs_style;
     contjs_style = lv_style_plain;
     contjs_style.body.main_color = LV_COLOR_BLACK;
@@ -45,27 +44,27 @@ static void Joystick_Creat(
     contjs_style.body.opa = LV_OPA_30;
     lv_joystick_set_style(js, LV_JOYSTICK_STYLE_BASEPLATE, &contjs_style);
 
-    /*µ◊∞Â Æ◊÷º‹*/
+    /*Â∫ïÊùøÂçÅÂ≠óÊû∂*/
     static lv_style_t style_line;
     style_line = lv_style_plain;
     style_line.line.color = LV_COLOR_GRAY;
     style_line.line.width = 1;
     lv_joystick_set_style(js, LV_JOYSTICK_STYLE_LINE, &style_line);
 
-    /*Ã˘Õº*/
+    /*Ë¥¥Âõæ*/
     LV_IMG_DECLARE(IMG_JsFrame);
     LV_IMG_DECLARE(IMG_JsStick);
-    
-    /*“°∏À*/
-    lv_obj_t * imgJsStick = lv_img_create(lv_joystick_get_base_plate(js), NULL);
+
+    /*ÊëáÊùÜ*/
+    lv_obj_t *imgJsStick = lv_img_create(lv_joystick_get_base_plate(js), NULL);
     lv_img_set_src(imgJsStick, &IMG_JsStick);
     lv_obj_align(imgJsStick, NULL, LV_ALIGN_CENTER, 0, 0);
 
-    /*“°∏ÀøÚ*/
-    lv_obj_t * imgJsFrame = lv_img_create(par, NULL);
+    /*ÊëáÊùÜÊ°Ü*/
+    lv_obj_t *imgJsFrame = lv_img_create(par, NULL);
     lv_img_set_src(imgJsFrame, &IMG_JsFrame);
     lv_obj_align(imgJsFrame, js, LV_ALIGN_CENTER, 0, 0);
-    
+
     *joystick = js;
 }
 
@@ -77,12 +76,11 @@ static void Joystick_Update()
 
 static void Switch_Creat(
     uint8_t swIndex,
-    const char* text,
-    lv_obj_t * par,
-    lv_align_t align, lv_coord_t x_mod, lv_coord_t y_mod
-)
+    const char *text,
+    lv_obj_t *par,
+    lv_align_t align, lv_coord_t x_mod, lv_coord_t y_mod)
 {
-    lv_obj_t * cont = lv_cont_create(par, NULL);
+    lv_obj_t *cont = lv_cont_create(par, NULL);
     lv_obj_set_size(cont, contSW_Width, contSW_Height);
     lv_obj_align(cont, par, align, x_mod, y_mod);
     static lv_style_t style_cont;
@@ -96,13 +94,13 @@ static void Switch_Creat(
     lv_cont_set_style(cont, LV_CONT_STYLE_MAIN, &style_cont);
 
     LV_IMG_DECLARE(IMG_Switch);
-    lv_obj_t * img = lv_img_create(cont, NULL);
+    lv_obj_t *img = lv_img_create(cont, NULL);
     lv_img_set_src(img, &IMG_Switch);
     lv_obj_align(img, NULL, LV_ALIGN_CENTER, 0, 0);
     imgSW_MidPos = lv_obj_get_y(img);
     imgSW[swIndex] = img;
 
-    lv_obj_t * label = lv_label_create(par, NULL);
+    lv_obj_t *label = lv_label_create(par, NULL);
     lv_label_set_text(label, text);
     lv_obj_align(label, cont, LV_ALIGN_OUT_BOTTOM_MID, 0, 2);
 }
@@ -113,22 +111,22 @@ static void Switch_Turn(uint8_t swIndex, uint8_t state)
     LV_OBJ_ADD_ANIM(imgSW[swIndex], y, y_pos[state % 3], 100);
 }
 
-static void Switch_Event(int event, void* sw)
+static void Switch_Event(int event, void *sw)
 {
     uint8_t state = 0;
-    for(int i = 0; i < SW_IDX_MAX; i++)
+    for (int i = 0; i < SW_IDX_MAX; i++)
     {
-        if(sw == &swGrp[i])
+        if (sw == &swGrp[i])
         {
-            if(event == SwitchEvent::EVENT_SwitchUp)
+            if (event == SwitchEvent::EVENT_SwitchUp)
             {
                 state = 0;
             }
-            else if(event == SwitchEvent::EVENT_SwitchOff)
+            else if (event == SwitchEvent::EVENT_SwitchOff)
             {
                 state = 1;
             }
-            else if(event == SwitchEvent::EVENT_SwitchDown)
+            else if (event == SwitchEvent::EVENT_SwitchDown)
             {
                 state = 2;
             }
@@ -137,7 +135,7 @@ static void Switch_Event(int event, void* sw)
     }
 }
 
-static void LED_Creat(lv_obj_t * par)
+static void LED_Creat(lv_obj_t *par)
 {
     /*Create a style for the LED*/
     static lv_style_t style_led;
@@ -162,44 +160,43 @@ static void LED_Creat(lv_obj_t * par)
 #endif
 
 #ifndef TAB_SLAVE_INFO
-static lv_obj_t * labelSlave;
+static lv_obj_t *labelSlave;
 static uint8_t SlaveInfo_Mode = 0;
 
 static void SlaveInfo_SwitchMode()
 {
     SlaveInfo_Mode++;
-    if(SlaveInfo_Mode > 1)
+    if (SlaveInfo_Mode > 1)
         SlaveInfo_Mode = 0;
 }
 
-static void SlaveInfo_Creat(lv_obj_t * par)
+static void SlaveInfo_Creat(lv_obj_t *par)
 {
-    lv_obj_t * label = lv_label_create(par, NULL);
+    lv_obj_t *label = lv_label_create(par, NULL);
     lv_label_set_text(label, "Not Connected");
     lv_obj_align(label, par, LV_ALIGN_IN_LEFT_MID, 20, 0);
     lv_obj_set_auto_realign(label, true);
     labelSlave = label;
-    
+
     SlaveInfo_Mode = 0;
 }
 
 static void SlaveInfo_NormalUpdate()
 {
-    if(SlaveInfo_Mode == 0)
+    if (SlaveInfo_Mode == 0)
     {
         float battVoltage = RCX::RxGetPackChannel(0) / 1000.0f;
         uint8_t battlevel = map(RCX::RxGetPackChannel(1), 0, RCX_CHANNEL_DATA_MAX, 0, 100);
         lv_label_set_text_fmt(
-            labelSlave, 
+            labelSlave,
             "Type: 0x%x  RSSI: %d%%\n"
             "ID: 0x%x  Freq: %dMHz\n"
             "Battery: %0.1fV %d%%",
             RCX::TxGetObjectType(), nrf.RF_RSSI,
             RCX::TxGetObjectID(), nrf.RF_Freq + 2400,
-            battVoltage, battlevel
-        );
+            battVoltage, battlevel);
     }
-    else if(SlaveInfo_Mode == 1)
+    else if (SlaveInfo_Mode == 1)
     {
         lv_label_set_text_fmt(
             labelSlave,
@@ -211,47 +208,44 @@ static void SlaveInfo_NormalUpdate()
             RCX::RxGetPackChannel(0), RCX::RxGetPackChannel(1),
             RCX::RxGetPackChannel(2), RCX::RxGetPackChannel(3),
             RCX::RxGetPackChannel(4), RCX::RxGetPackChannel(5),
-            RCX::RxGetPackChannel(6), RCX::RxGetPackChannel(7)
-        );
+            RCX::RxGetPackChannel(6), RCX::RxGetPackChannel(7));
     }
 }
 
 static void SlaveInfo_Update()
 {
-    if(RCX::RxGetConnected())
+    if (RCX::RxGetConnected())
     {
         SlaveInfo_NormalUpdate();
     }
-    else if(RCX::RxGetSignalLost())
+    else if (RCX::RxGetSignalLost())
     {
-        #define ERROR_CODE_DEF(errcd) (errorCode & RCX::EC_##errcd ? #errcd"\n" : "")
+#define ERROR_CODE_DEF(errcd) (errorCode & RCX::EC_##errcd ? #errcd "\n" : "")
         uint8_t errorCode = RCX::RxGetPackErrorCode();
         lv_label_set_text_fmt(
-            labelSlave, 
+            labelSlave,
             "ERROR: 0x%x\n%s%s%s%s",
             errorCode,
             ERROR_CODE_DEF(CONNECT_TIMEOUT),
             ERROR_CODE_DEF(TYPE_ERROR),
             ERROR_CODE_DEF(ID_ERROR),
-            ERROR_CODE_DEF(CRC_ERROR)
-        );
+            ERROR_CODE_DEF(CRC_ERROR));
     }
 }
 
 #endif
 
 #ifndef TAB_CHANNEL
-static lv_obj_t * sliderGrp[8];
+static lv_obj_t *sliderGrp[8];
 #define Slider_Height 16
-#define Slider_Width  75
+#define Slider_Width 75
 
 static void ChannelSlider_Creat(
-    lv_obj_t** sliderCh, uint8_t chNum,
-    lv_obj_t * par,
-    lv_align_t align, lv_coord_t x_mod, lv_coord_t y_mod
-)
+    lv_obj_t **sliderCh, uint8_t chNum,
+    lv_obj_t *par,
+    lv_align_t align, lv_coord_t x_mod, lv_coord_t y_mod)
 {
-    lv_obj_t * slider = lv_slider_create(par, NULL);
+    lv_obj_t *slider = lv_slider_create(par, NULL);
     lv_obj_set_size(slider, Slider_Width, Slider_Height);
     lv_obj_align(slider, par, align, x_mod, y_mod);
     lv_slider_set_range(slider, -RCX_CHANNEL_DATA_MAX, RCX_CHANNEL_DATA_MAX);
@@ -260,14 +254,14 @@ static void ChannelSlider_Creat(
     lv_slider_set_sym(slider, true);
     *sliderCh = slider;
 
-    lv_obj_t * label = lv_label_create(par, NULL);
+    lv_obj_t *label = lv_label_create(par, NULL);
     lv_label_set_text_fmt(label, "CH%d", chNum);
     lv_obj_align(label, slider, LV_ALIGN_OUT_LEFT_MID, -3, 2);
 }
 
 static void ChannelSlider_Update()
 {
-    for(int i = 0; i < __Sizeof(sliderGrp); i++)
+    for (int i = 0; i < __Sizeof(sliderGrp); i++)
     {
         int16_t chVal = RCX::ChannelRead(i);
         lv_slider_set_value(sliderGrp[i], chVal, LV_ANIM_OFF);
@@ -282,7 +276,7 @@ static void TabView_MoveTab(int8_t dir)
 
     lv_tabview_set_tab_act(tabview, newTabIndex, LV_ANIM_ON);
 
-    for(int i = 0; i < __Sizeof(ledGrp); i++)
+    for (int i = 0; i < __Sizeof(ledGrp); i++)
     {
         ((newTabIndex - 1) == i) ? lv_led_on(ledGrp[i]) : lv_led_off(ledGrp[i]);
     }
@@ -303,15 +297,15 @@ static void TabView_Creat()
     TabView_MoveTab(0);
 }
 
-/********** ª˘±æ ************/
+/********** Âü∫Êú¨ ************/
 /**
-  * @brief  “≥√Ê≥ı ºªØ ¬º˛
-  * @param  Œﬁ
-  * @retval Œﬁ
-  */
+ * @brief  È°µÈù¢ÂàùÂßãÂåñ‰∫ã‰ª∂
+ * @param  Êó†
+ * @retval Êó†
+ */
 static void Setup()
 {
-    /*Ω´¥À“≥√Ê“∆µΩ«∞Ã®*/
+    /*Â∞ÜÊ≠§È°µÈù¢ÁßªÂà∞ÂâçÂè∞*/
     lv_obj_move_foreground(appWindow);
 
     nrf.SetRF_Enable(true);
@@ -325,31 +319,30 @@ static void Setup()
     Switch_Creat(SW_IDX_E, "E", tabGrp[0], LV_ALIGN_CENTER, -8, 0);
     Switch_Creat(SW_IDX_F, "F", tabGrp[0], LV_ALIGN_CENTER, 8, 0);
     Switch_Creat(SW_IDX_H, "H", tabGrp[0], LV_ALIGN_CENTER, 2 + 13 + 8, 0);
-    
+
     SlaveInfo_Creat(tabGrp[1]);
 
     const int16_t ch_y_mod[4] =
-    {
-        -Slider_Height * 2,
-        -Slider_Height * 0.7f,
-        Slider_Height * 0.7f,
-        Slider_Height * 2
-    };
-    for(int i = 0; i < __Sizeof(sliderGrp); i++)
+        {
+            -Slider_Height * 2,
+            -Slider_Height * 0.7f,
+            Slider_Height * 0.7f,
+            Slider_Height * 2};
+    for (int i = 0; i < __Sizeof(sliderGrp); i++)
     {
         ChannelSlider_Creat(&sliderGrp[i], i, tabGrp[2], LV_ALIGN_CENTER, (i % 2 ? 70 : -45), ch_y_mod[i / 2]);
     }
 }
 
 /**
-  * @brief  “≥√Ê—≠ª∑ ¬º˛
-  * @param  Œﬁ
-  * @retval Œﬁ
-  */
+ * @brief  È°µÈù¢Âæ™ÁéØ‰∫ã‰ª∂
+ * @param  Êó†
+ * @retval Êó†
+ */
 static void Loop()
 {
     uint8_t actTab = lv_tabview_get_tab_act(tabview);
-    switch(actTab)
+    switch (actTab)
     {
     case 1:
         Joystick_Update();
@@ -364,10 +357,10 @@ static void Loop()
 }
 
 /**
-  * @brief  “≥√ÊÕÀ≥ˆ ¬º˛
-  * @param  Œﬁ
-  * @retval Œﬁ
-  */
+ * @brief  È°µÈù¢ÈÄÄÂá∫‰∫ã‰ª∂
+ * @param  Êó†
+ * @retval Êó†
+ */
 static void Exit()
 {
     lv_tabview_set_tab_act(tabview, 0, LV_ANIM_ON);
@@ -379,41 +372,41 @@ static void Exit()
 }
 
 /**
-  * @brief  “≥√Ê ¬º˛
-  * @param  btn:∑¢≥ˆ ¬º˛µƒ∞¥º¸
-  * @param  event: ¬º˛±‡∫≈
-  * @retval Œﬁ
-  */
-static void Event(void* btn, int event)
+ * @brief  È°µÈù¢‰∫ã‰ª∂
+ * @param  btn:ÂèëÂá∫‰∫ã‰ª∂ÁöÑÊåâÈîÆ
+ * @param  event:‰∫ã‰ª∂ÁºñÂè∑
+ * @retval Êó†
+ */
+static void Event(void *btn, int event)
 {
-    if(event > SwitchEvent::EVENT_SwitchNone)
+    if (event > SwitchEvent::EVENT_SwitchNone)
     {
         Switch_Event(event, btn);
         return;
     }
 
-    if(btn == &btBACK)
+    if (btn == &btBACK)
     {
-        if(event == ButtonEvent::EVENT_ButtonLongPressed)
+        if (event == ButtonEvent::EVENT_ButtonLongPressed)
         {
             Page_ReturnHome();
         }
     }
 
-    if(event == ButtonEvent::EVENT_ButtonClick)
+    if (event == ButtonEvent::EVENT_ButtonClick)
     {
-        if(btn == &btUPL)
+        if (btn == &btUPL)
         {
             TabView_MoveTab(-1);
         }
-        if(btn == &btDOWNL)
+        if (btn == &btDOWNL)
         {
             TabView_MoveTab(+1);
         }
     }
-    if(event == ButtonEvent::EVENT_ButtonLongPressed)
+    if (event == ButtonEvent::EVENT_ButtonLongPressed)
     {
-        if(btn == &btUPL)
+        if (btn == &btUPL)
         {
             SlaveInfo_SwitchMode();
         }
@@ -421,10 +414,10 @@ static void Event(void* btn, int event)
 }
 
 /**
-  * @brief  “≥√Ê◊¢≤·
-  * @param  pageID:Œ™¥À“≥√Ê∑÷≈‰µƒID∫≈
-  * @retval Œﬁ
-  */
+ * @brief  È°µÈù¢Ê≥®ÂÜå
+ * @param  pageID:‰∏∫Ê≠§È°µÈù¢ÂàÜÈÖçÁöÑIDÂè∑
+ * @retval Êó†
+ */
 void PageRegister_CtrlPage(uint8_t pageID)
 {
     appWindow = AppWindow_GetCont(pageID);

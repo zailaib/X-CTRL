@@ -2,29 +2,28 @@
 #include "ComPrivate.h"
 #include "BSP/BSP.h"
 
-/*ÊµÀı»¯NRF¶ÔÏó*/
+/*å®ä¾‹åŒ–NRFå¯¹è±¡*/
 NRF_Basic nrf(
     NRF_MOSI_Pin, NRF_MISO_Pin, NRF_SCK_Pin,
-    NRF_CE_Pin, NRF_CSN_Pin
-);
-//IRQ   MISO
-//MOSI  SCK
-//CSN   CE
-//VCC   GND
+    NRF_CE_Pin, NRF_CSN_Pin);
+// IRQ   MISO
+// MOSI  SCK
+// CSN   CE
+// VCC   GND
 
-/*¶¨ÆµÊÕ·¢¹ÜÀíÆ÷*/
-NRF_TRM  nrfTRM(&nrf);
+/*å®šé¢‘æ”¶å‘ç®¡ç†å™¨*/
+NRF_TRM nrfTRM(&nrf);
 
-/*ÌøÆµÊÕ·¢¹ÜÀíÆ÷*/
+/*è·³é¢‘æ”¶å‘ç®¡ç†å™¨*/
 NRF_FHSS nrfFHSS(&nrf);
 
-/*NRF·¢ËÍÊı¾İ»º³åÇø*/
+/*NRFå‘é€æ•°æ®ç¼“å†²åŒº*/
 static uint8_t NRF_TxBuff[32];
 
-/*NRF½ÓÊÕÊı¾İ»º³åÇø*/
+/*NRFæ¥æ”¶æ•°æ®ç¼“å†²åŒº*/
 static uint8_t NRF_RxBuff[32];
 
-/*Í¨ĞÅÊ¹ÄÜ*/
+/*é€šä¿¡ä½¿èƒ½*/
 static bool Com_Enable = false;
 
 void Com_SetEnable(bool en)
@@ -39,55 +38,54 @@ bool Com_GetEnable()
 }
 
 /**
-  * @brief  Í¨ĞÅ³õÊ¼»¯
-  * @param  ÎŞ
-  * @retval true³É¹¦ falseÊ§°Ü
-  */
+ * @brief  é€šä¿¡åˆå§‹åŒ–
+ * @param  æ— 
+ * @retval trueæˆåŠŸ falseå¤±è´¥
+ */
 bool Com_Init()
 {
-    /*Ä¬ÈÏ³õÊ¼»¯*/
+    /*é»˜è®¤åˆå§‹åŒ–*/
     bool isInit = nrf.Init();
 
-    /*·¢ËÍÄ£Ê½*/
+    /*å‘é€æ¨¡å¼*/
     nrf.TX_Mode();
 
-    /*Êı¾İ°ü³¤¶È*/
+    /*æ•°æ®åŒ…é•¿åº¦*/
     nrf.SetPayloadWidth(sizeof(NRF_TxBuff), sizeof(NRF_RxBuff));
-    
-    /*ÉèÖÃËÙÂÊ*/
+
+    /*è®¾ç½®é€Ÿç‡*/
     nrf.SetSpeed(CTRL.RF_Config->Speed);
-    
-    /*ÉèÖÃÆµÂÊ*/
+
+    /*è®¾ç½®é¢‘ç‡*/
     nrf.SetFreqency(CTRL.RF_Config->Freq);
-    
-    /*ÉèÖÃµØÖ·*/
+
+    /*è®¾ç½®åœ°å€*/
     nrf.SetAddress(CTRL.RF_Config->Addr);
 
-    /*½ûÓÃÉäÆµ*/
+    /*ç¦ç”¨å°„é¢‘*/
     nrf.SetRF_Enable(false);
 
-    /*¸üĞÂ¼Ä´æÆ÷×´Ì¬*/
+    /*æ›´æ–°å¯„å­˜å™¨çŠ¶æ€*/
     nrf.UpdateRegs();
 
-    /*·µ»ØÁ¬½ÓÇé¿ö*/
+    /*è¿”å›è¿æ¥æƒ…å†µ*/
     return isInit;
 }
 
 static void Com_TxRxProcess()
 {
-    if(CTRL.State->FHSS)
+    if (CTRL.State->FHSS)
     {
         nrfFHSS.TxProcess(
             NRF_TxBuff,
-            CTRL.State->Passback ? NRF_RxBuff : NULL
-        );
+            CTRL.State->Passback ? NRF_RxBuff : NULL);
     }
     else
     {
         nrfTRM.TranRecv(NRF_TxBuff, NRF_RxBuff);
     }
 
-    if(CTRL.State->Passback)
+    if (CTRL.State->Passback)
     {
         RCX::RxLoadPack(NRF_RxBuff);
         Com_PassbackProcess(RCX::RxGetSignalLost() ? PBS_Error : PBS_Loop);
@@ -95,31 +93,31 @@ static void Com_TxRxProcess()
 }
 
 /**
-  * @brief  Êı¾İ·¢ËÍÈÎÎñ
-  * @param  ÎŞ
-  * @retval ÎŞ
-  */
+ * @brief  æ•°æ®å‘é€ä»»åŠ¡
+ * @param  æ— 
+ * @retval æ— 
+ */
 void Com_Update()
 {
-    if(!Com_Enable)
+    if (!Com_Enable)
         return;
-    
-    /*Ğ´Èë°´¼ü×´Ì¬*/
+
+    /*å†™å…¥æŒ‰é”®çŠ¶æ€*/
     RCX::TxSetPackKey(CTRL.Key.Value);
-    /*ÔØÈëÊı¾İ°üµ½·¢ËÍ»º³åÇø*/
+    /*è½½å…¥æ•°æ®åŒ…åˆ°å‘é€ç¼“å†²åŒº*/
     RCX::TxLoadPack(NRF_TxBuff);
 
-    if(CTRL.State->FHSS || CTRL.State->Passback)
+    if (CTRL.State->FHSS || CTRL.State->Passback)
     {
         Com_TxRxProcess();
     }
     else
     {
-        if(nrf.GetRF_State() != nrf.State_TX)
+        if (nrf.GetRF_State() != nrf.State_TX)
         {
             nrf.TX_Mode();
         }
         nrf.TranCheck();
-        nrf.Tran(NRF_TxBuff);//NRF·¢ËÍÊı¾İ
+        nrf.Tran(NRF_TxBuff); // NRFå‘é€æ•°æ®
     }
 }

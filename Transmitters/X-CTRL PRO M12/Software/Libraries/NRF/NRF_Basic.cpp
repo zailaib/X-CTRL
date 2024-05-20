@@ -1,829 +1,841 @@
 #include "NRF.h"
 
 #ifdef NRF_SPI_OBJECT
-#  if defined (__AVR__)
-#    define NRF_SPI_BEGIN() {NRF_SPI_OBJECT.begin(),NRF_SPI_OBJECT.beginTransaction(SPISettings(8000000, MSBFIRST, SPI_MODE0));}
-#  elif defined(__STM32__)
-#    define NRF_SPI_BEGIN() {NRF_SPI_OBJECT.begin(SPISettings(10000000, MSBFIRST, SPI_MODE0));}
-#  endif
-#  define SPI_Transfer(x) NRF_SPI_OBJECT.transfer(x)
+#if defined(__AVR__)
+#define NRF_SPI_BEGIN()                                                                                 \
+  {                                                                                                     \
+    NRF_SPI_OBJECT.begin(), NRF_SPI_OBJECT.beginTransaction(SPISettings(8000000, MSBFIRST, SPI_MODE0)); \
+  }
+#elif defined(__STM32__)
+#define NRF_SPI_BEGIN()                                               \
+  {                                                                   \
+    NRF_SPI_OBJECT.begin(SPISettings(10000000, MSBFIRST, SPI_MODE0)); \
+  }
+#endif
+#define SPI_Transfer(x) NRF_SPI_OBJECT.transfer(x)
 #endif
 
 #ifdef USE_FAST_IO
-/*Ê¹ÓÃ¼Ä´æÆ÷Ö±½Ó¿ØÖÆGPIO*/
-#  define FAST_IO_HIGH(port,mask) (*port|=mask)
-#  define FAST_IO_LOW(port,mask)  (*port&=~mask)
-#  define FAST_IO_READ(port,mask) ((*port&mask)!=0)
+/*ä½¿ç”¨å¯„å­˜å™¨ç›´æ¥æ§åˆ¶GPIO*/
+#define FAST_IO_HIGH(port, mask) (*port |= mask)
+#define FAST_IO_LOW(port, mask) (*port &= ~mask)
+#define FAST_IO_READ(port, mask) ((*port & mask) != 0)
 
-#  define NRF_MISO_READ() FAST_IO_READ(misoport,misopinmask)
-#  define NRF_MOSI_HIGH() FAST_IO_HIGH(mosiport,mosipinmask)
-#  define NRF_MOSI_LOW()  FAST_IO_LOW(mosiport,mosipinmask)
-#  define NRF_SCK_HIGH()  FAST_IO_HIGH(sckport,sckpinmask)
-#  define NRF_SCK_LOW()   FAST_IO_LOW(sckport,sckpinmask)
-#  define NRF_CE_HIGH()   FAST_IO_HIGH(ceport,cepinmask)
-#  define NRF_CE_LOW()    FAST_IO_LOW(ceport,cepinmask)
-#  define NRF_CSN_HIGH()  FAST_IO_HIGH(csnport,csnpinmask)
-#  define NRF_CSN_LOW()   FAST_IO_LOW(csnport,csnpinmask)
+#define NRF_MISO_READ() FAST_IO_READ(misoport, misopinmask)
+#define NRF_MOSI_HIGH() FAST_IO_HIGH(mosiport, mosipinmask)
+#define NRF_MOSI_LOW() FAST_IO_LOW(mosiport, mosipinmask)
+#define NRF_SCK_HIGH() FAST_IO_HIGH(sckport, sckpinmask)
+#define NRF_SCK_LOW() FAST_IO_LOW(sckport, sckpinmask)
+#define NRF_CE_HIGH() FAST_IO_HIGH(ceport, cepinmask)
+#define NRF_CE_LOW() FAST_IO_LOW(ceport, cepinmask)
+#define NRF_CSN_HIGH() FAST_IO_HIGH(csnport, csnpinmask)
+#define NRF_CSN_LOW() FAST_IO_LOW(csnport, csnpinmask)
 
 #else
-/*Ê¹ÓÃArduino±ê×¼º¯Êı¿ØÖÆ¿ØÖÆGPIO*/
-#  define NRF_MISO_READ() digitalRead(MISO_Pin)
-#  define NRF_MOSI_HIGH() digitalWrite(MOSI_Pin,1)
-#  define NRF_MOSI_LOW()  digitalWrite(MOSI_Pin,0)
-#  define NRF_SCK_HIGH()  digitalWrite(SCK_Pin,1)
-#  define NRF_SCK_LOW()   digitalWrite(SCK_Pin,0)
-#  define NRF_CE_HIGH()   digitalWrite(CE_Pin,1)
-#  define NRF_CE_LOW()    digitalWrite(CE_Pin,0)
-#  define NRF_CSN_HIGH()  digitalWrite(CSN_Pin,1)
-#  define NRF_CSN_LOW()   digitalWrite(CSN_Pin,0)
+/*ä½¿ç”¨Arduinoæ ‡å‡†å‡½æ•°æ§åˆ¶æ§åˆ¶GPIO*/
+#define NRF_MISO_READ() digitalRead(MISO_Pin)
+#define NRF_MOSI_HIGH() digitalWrite(MOSI_Pin, 1)
+#define NRF_MOSI_LOW() digitalWrite(MOSI_Pin, 0)
+#define NRF_SCK_HIGH() digitalWrite(SCK_Pin, 1)
+#define NRF_SCK_LOW() digitalWrite(SCK_Pin, 0)
+#define NRF_CE_HIGH() digitalWrite(CE_Pin, 1)
+#define NRF_CE_LOW() digitalWrite(CE_Pin, 0)
+#define NRF_CSN_HIGH() digitalWrite(CSN_Pin, 1)
+#define NRF_CSN_LOW() digitalWrite(CSN_Pin, 0)
 #endif
 
-/*¼Ä´æÆ÷½á¹¹Ìå×ªu8±äÁ¿*/
-#define REG2U8(reg)   (*((uint8_t*)(&(reg))))
-/*¶ÁĞ´¼Ä´æÆ÷µ½½á¹¹Ìå*/
-#define REGREAD(reg)  REG2U8((REG_##reg))=SPI_Read(READ_REG+reg)
-#define REGWRITE(reg) SPI_RW_Reg(WRITE_REG+reg,REG2U8(REG_##reg))
-    
+/*å¯„å­˜å™¨ç»“æ„ä½“è½¬u8å˜é‡*/
+#define REG2U8(reg) (*((uint8_t *)(&(reg))))
+/*è¯»å†™å¯„å­˜å™¨åˆ°ç»“æ„ä½“*/
+#define REGREAD(reg) REG2U8((REG_##reg)) = SPI_Read(READ_REG + reg)
+#define REGWRITE(reg) SPI_RW_Reg(WRITE_REG + reg, REG2U8(REG_##reg))
 
 /**
-  * @brief  ¹¹Ôìº¯Êı£¬´«ÈëÁ¬½ÓµÄÒı½Å±àºÅ£¬Èí¼şSPI·½Ê½
-  * @param  mosi: Á¬½ÓMOSIµÄÒı½Å±àºÅ
-  * @param  miso: Á¬½ÓMISOµÄÒı½Å±àºÅ
-  * @param  sck:  Á¬½ÓSCK µÄÒı½Å±àºÅ
-  * @param  se:   Á¬½ÓCE  µÄÒı½Å±àºÅ
-  * @param  csn:  Á¬½ÓCSNµÄÒı½Å±àºÅ
-  * @retval ÎŞ
-  */
+ * @brief  æ„é€ å‡½æ•°ï¼Œä¼ å…¥è¿æ¥çš„å¼•è„šç¼–å·ï¼Œè½¯ä»¶SPIæ–¹å¼
+ * @param  mosi: è¿æ¥MOSIçš„å¼•è„šç¼–å·
+ * @param  miso: è¿æ¥MISOçš„å¼•è„šç¼–å·
+ * @param  sck:  è¿æ¥SCK çš„å¼•è„šç¼–å·
+ * @param  se:   è¿æ¥CE  çš„å¼•è„šç¼–å·
+ * @param  csn:  è¿æ¥CSNçš„å¼•è„šç¼–å·
+ * @retval æ— 
+ */
 NRF_Basic::NRF_Basic(uint8_t mosi, uint8_t miso, uint8_t sck, uint8_t ce, uint8_t csn)
 {
-    /*²»Ê¹ÓÃÓ²¼şSPI*/
-    hwSPI = false;
-    
-    /*Òı½Å±àºÅ´«Èë*/
-    MOSI_Pin = mosi;
-    MISO_Pin = miso;
-    SCK_Pin = sck;
-    CE_Pin = ce;
-    CSN_Pin = csn;
+  /*ä¸ä½¿ç”¨ç¡¬ä»¶SPI*/
+  hwSPI = false;
+
+  /*å¼•è„šç¼–å·ä¼ å…¥*/
+  MOSI_Pin = mosi;
+  MISO_Pin = miso;
+  SCK_Pin = sck;
+  CE_Pin = ce;
+  CSN_Pin = csn;
 
 #ifdef USE_FAST_IO
-    /*È¡GPIO¼Ä´æÆ÷µØÖ·£¬ÓÃÓÚ¸ßËÙ¿ØÖÆIO*/
-    mosiport    = portOutputRegister(digitalPinToPort(MOSI_Pin));
-    mosipinmask = digitalPinToBitMask(MOSI_Pin);
-    misoport    = portInputRegister(digitalPinToPort(MISO_Pin));
-    misopinmask = digitalPinToBitMask(MISO_Pin);
-    sckport     = portOutputRegister(digitalPinToPort(SCK_Pin));
-    sckpinmask  = digitalPinToBitMask(SCK_Pin);
+  /*å–GPIOå¯„å­˜å™¨åœ°å€ï¼Œç”¨äºé«˜é€Ÿæ§åˆ¶IO*/
+  mosiport = portOutputRegister(digitalPinToPort(MOSI_Pin));
+  mosipinmask = digitalPinToBitMask(MOSI_Pin);
+  misoport = portInputRegister(digitalPinToPort(MISO_Pin));
+  misopinmask = digitalPinToBitMask(MISO_Pin);
+  sckport = portOutputRegister(digitalPinToPort(SCK_Pin));
+  sckpinmask = digitalPinToBitMask(SCK_Pin);
 
-    ceport  = portOutputRegister(digitalPinToPort(CE_Pin));
-    cepinmask   = digitalPinToBitMask(CE_Pin);
-    csnport = portOutputRegister(digitalPinToPort(CSN_Pin));
-    csnpinmask  = digitalPinToBitMask(CSN_Pin);
+  ceport = portOutputRegister(digitalPinToPort(CE_Pin));
+  cepinmask = digitalPinToBitMask(CE_Pin);
+  csnport = portOutputRegister(digitalPinToPort(CSN_Pin));
+  csnpinmask = digitalPinToBitMask(CSN_Pin);
 #endif
 }
 
 #ifdef NRF_SPI_OBJECT
 /**
-  * @brief  ¹¹Ôìº¯Êı£¬´«ÈëÁ¬½ÓµÄÒı½Å±àºÅ£¬Ó²¼şSPI·½Ê½
-  * @param  se:   Á¬½ÓCE  µÄÒı½Å±àºÅ
-  * @param  csn:  Á¬½ÓCSNµÄÒı½Å±àºÅ
-  * @retval ÎŞ
-  */
+ * @brief  æ„é€ å‡½æ•°ï¼Œä¼ å…¥è¿æ¥çš„å¼•è„šç¼–å·ï¼Œç¡¬ä»¶SPIæ–¹å¼
+ * @param  se:   è¿æ¥CE  çš„å¼•è„šç¼–å·
+ * @param  csn:  è¿æ¥CSNçš„å¼•è„šç¼–å·
+ * @retval æ— 
+ */
 NRF_Basic::NRF_Basic(uint8_t ce, uint8_t csn)
-{    
-    /*Ê¹ÓÃÓ²¼şSPI*/
-    hwSPI = true;
+{
+  /*ä½¿ç”¨ç¡¬ä»¶SPI*/
+  hwSPI = true;
 
-    /*Òı½Å±àºÅ´«Èë*/
-    CE_Pin = ce;
-    CSN_Pin = csn;
+  /*å¼•è„šç¼–å·ä¼ å…¥*/
+  CE_Pin = ce;
+  CSN_Pin = csn;
 #ifdef USE_FAST_IO
-    /*È¡GPIO¼Ä´æÆ÷µØÖ·£¬ÓÃÓÚ¸ßËÙ¿ØÖÆIO*/
-    ceport = portOutputRegister(digitalPinToPort(CE_Pin));
-    cepinmask = digitalPinToBitMask(CE_Pin);
-    csnport = portOutputRegister(digitalPinToPort(CSN_Pin));
-    csnpinmask = digitalPinToBitMask(CSN_Pin);
+  /*å–GPIOå¯„å­˜å™¨åœ°å€ï¼Œç”¨äºé«˜é€Ÿæ§åˆ¶IO*/
+  ceport = portOutputRegister(digitalPinToPort(CE_Pin));
+  cepinmask = digitalPinToBitMask(CE_Pin);
+  csnport = portOutputRegister(digitalPinToPort(CSN_Pin));
+  csnpinmask = digitalPinToBitMask(CSN_Pin);
 #endif
 }
 #endif
 
 /**
-  * @brief  ³õÊ¼»¯
-  * @param  ÎŞ
-  * @retval ÊÇ·ñ³õÊ¼»¯³É¹¦
-  */
+ * @brief  åˆå§‹åŒ–
+ * @param  æ— 
+ * @retval æ˜¯å¦åˆå§‹åŒ–æˆåŠŸ
+ */
 bool NRF_Basic::Init()
 {
 #ifdef NRF_SPI_OBJECT
-    if(hwSPI)
-    {
-        NRF_SPI_BEGIN();//Ó²¼şSPI³õÊ¼»¯
-    }
-    else
-    {
-        pinMode(MOSI_Pin, OUTPUT);
-        pinMode(MISO_Pin, INPUT);
-        pinMode(SCK_Pin, OUTPUT);
-    }
-#else
+  if (hwSPI)
+  {
+    NRF_SPI_BEGIN(); // ç¡¬ä»¶SPIåˆå§‹åŒ–
+  }
+  else
+  {
     pinMode(MOSI_Pin, OUTPUT);
     pinMode(MISO_Pin, INPUT);
     pinMode(SCK_Pin, OUTPUT);
+  }
+#else
+  pinMode(MOSI_Pin, OUTPUT);
+  pinMode(MISO_Pin, INPUT);
+  pinMode(SCK_Pin, OUTPUT);
 #endif
 
-    pinMode(CE_Pin, OUTPUT);
-    pinMode(CSN_Pin, OUTPUT);
-    
-    NRF_CE_LOW();
-    NRF_CSN_HIGH();
-    
-    bool isRst = Reset();
-    ClearFlag();
-    SetDefault();
-    
-    return (IsDetect() && isRst);
+  pinMode(CE_Pin, OUTPUT);
+  pinMode(CSN_Pin, OUTPUT);
+
+  NRF_CE_LOW();
+  NRF_CSN_HIGH();
+
+  bool isRst = Reset();
+  ClearFlag();
+  SetDefault();
+
+  return (IsDetect() && isRst);
 }
 
 /**
-  * @brief  ¸´Î»
-  * @param  ÎŞ
-  * @retval true³É¹¦ falseÊ§°Ü
-  */
+ * @brief  å¤ä½
+ * @param  æ— 
+ * @retval trueæˆåŠŸ falseå¤±è´¥
+ */
 bool NRF_Basic::Reset()
 {
-    SetRF_Enable(false);
-    SPI_RW_Reg(FLUSH_TX, 0);
-    SPI_RW_Reg(FLUSH_RX, 0);
-    uint8_t status1 = SPI_RW_Reg(NOP, 0);
-    uint8_t status2 = GetStatus();
-    SetPowerUp(false);
-    return (status1 == status2 && (status1 & 0x0F) == 0x0E);
+  SetRF_Enable(false);
+  SPI_RW_Reg(FLUSH_TX, 0);
+  SPI_RW_Reg(FLUSH_RX, 0);
+  uint8_t status1 = SPI_RW_Reg(NOP, 0);
+  uint8_t status2 = GetStatus();
+  SetPowerUp(false);
+  return (status1 == status2 && (status1 & 0x0F) == 0x0E);
 }
 
 /**
-  * @brief  ÉèÖÃÄ¬ÈÏ²ÎÊı
-  * @param  ÎŞ
-  * @retval ÎŞ
-  */
+ * @brief  è®¾ç½®é»˜è®¤å‚æ•°
+ * @param  æ— 
+ * @retval æ— 
+ */
 void NRF_Basic::SetDefault()
 {
-    /*Ä¬ÈÏ²ÎÊı*/
-    RF_Speed = SPEED_1Mbps;//Í¨ĞÅËÙÂÊ:1Mb/s
-    RF_Power = POWER_0dBm;//Í¨ĞÅ¹¦ÂÊ:0dBm(×î´ó)
-    RF_Freq = 40;//Í¨ĞÅÆµÂÊ40
-    RF_AutoRetryDelay = 1;//×Ô¶¯ÖØ·¢ÑÓÊ±(us) = 250 + n * 250
-    RF_AutoRetryCount = 15;//×Ô¶¯ÖØ·¢´ÎÊı15
-    RF_AddressWidth = sizeof(RF_Address);//µØÖ·¿í¶È5×Ö½Ú
-    RF_TX_PloadWidth = 32;//·¢ËÍÊı¾İ°ü³¤¶È
-    RF_RX_PloadWidth = 32;//½ÓÊÕÊı¾İ°ü³¤¶È
-    
-    /*RF Disable*/
-    SetRF_Enable(false);
-    
-    /*Configuration Register*/
-    REG_CONFIG.MASK_RX_DR  = 0;
-    REG_CONFIG.MASK_TX_DS  = 0;
-    REG_CONFIG.MASK_MAX_RT = 0;
-    REG_CONFIG.EN_CRC      = 1;
-    REG_CONFIG.CRCO        = 1;
-    REG_CONFIG.PWR_UP      = 1;
-    REG_CONFIG.PRIM_RX     = 1;
-    REGWRITE(CONFIG);
-    
-    /*Auto Acknowledgment*/
-    SPI_RW_Reg(WRITE_REG + EN_AA, 0x01);
-    
-    /*Enabled RX Addresses*/
-    SPI_RW_Reg(WRITE_REG + EN_RXADDR, 0x01);
-    
-    /*Channel*/
-    SetFreqency(RF_Freq);
-    
-    /*Rate*/
-    SetSpeed(RF_Speed);
-    
-    /*RF Power*/
-    SetPower(RF_Power);
-    
-    /*RF PayloadWidth*/
-    SetPayloadWidth(RF_TX_PloadWidth, RF_RX_PloadWidth);
-    
-    /*TX*/
-    SPI_Write_Buf(WRITE_REG + TX_ADDR, RF_Address, RF_AddressWidth);
-    SetAutoRetry(RF_AutoRetryDelay, RF_AutoRetryCount);
-    
-    /*RX*/
-    SPI_Write_Buf(WRITE_REG + RX_ADDR_P0, RF_Address, RF_AddressWidth);
-    SPI_RW_Reg(WRITE_REG + RX_PW_P0, RF_RX_PloadWidth);
+  /*é»˜è®¤å‚æ•°*/
+  RF_Speed = SPEED_1Mbps;               // é€šä¿¡é€Ÿç‡:1Mb/s
+  RF_Power = POWER_0dBm;                // é€šä¿¡åŠŸç‡:0dBm(æœ€å¤§)
+  RF_Freq = 40;                         // é€šä¿¡é¢‘ç‡40
+  RF_AutoRetryDelay = 1;                // è‡ªåŠ¨é‡å‘å»¶æ—¶(us) = 250 + n * 250
+  RF_AutoRetryCount = 15;               // è‡ªåŠ¨é‡å‘æ¬¡æ•°15
+  RF_AddressWidth = sizeof(RF_Address); // åœ°å€å®½åº¦5å­—èŠ‚
+  RF_TX_PloadWidth = 32;                // å‘é€æ•°æ®åŒ…é•¿åº¦
+  RF_RX_PloadWidth = 32;                // æ¥æ”¶æ•°æ®åŒ…é•¿åº¦
+
+  /*RF Disable*/
+  SetRF_Enable(false);
+
+  /*Configuration Register*/
+  REG_CONFIG.MASK_RX_DR = 0;
+  REG_CONFIG.MASK_TX_DS = 0;
+  REG_CONFIG.MASK_MAX_RT = 0;
+  REG_CONFIG.EN_CRC = 1;
+  REG_CONFIG.CRCO = 1;
+  REG_CONFIG.PWR_UP = 1;
+  REG_CONFIG.PRIM_RX = 1;
+  REGWRITE(CONFIG);
+
+  /*Auto Acknowledgment*/
+  SPI_RW_Reg(WRITE_REG + EN_AA, 0x01);
+
+  /*Enabled RX Addresses*/
+  SPI_RW_Reg(WRITE_REG + EN_RXADDR, 0x01);
+
+  /*Channel*/
+  SetFreqency(RF_Freq);
+
+  /*Rate*/
+  SetSpeed(RF_Speed);
+
+  /*RF Power*/
+  SetPower(RF_Power);
+
+  /*RF PayloadWidth*/
+  SetPayloadWidth(RF_TX_PloadWidth, RF_RX_PloadWidth);
+
+  /*TX*/
+  SPI_Write_Buf(WRITE_REG + TX_ADDR, RF_Address, RF_AddressWidth);
+  SetAutoRetry(RF_AutoRetryDelay, RF_AutoRetryCount);
+
+  /*RX*/
+  SPI_Write_Buf(WRITE_REG + RX_ADDR_P0, RF_Address, RF_AddressWidth);
+  SPI_RW_Reg(WRITE_REG + RX_PW_P0, RF_RX_PloadWidth);
 }
 
 /**
-  * @brief  ¸üĞÂ¼Ä´æÆ÷µ½½á¹¹Ìå
-  * @param  ÎŞ
-  * @retval ÎŞ
-  */
+ * @brief  æ›´æ–°å¯„å­˜å™¨åˆ°ç»“æ„ä½“
+ * @param  æ— 
+ * @retval æ— 
+ */
 void NRF_Basic::UpdateRegs()
 {
-    REGREAD(CONFIG);
-    REGREAD(EN_AA);
-    REGREAD(EN_RXADDR);
-    REGREAD(SETUP_AW);
-    REGREAD(SETUP_RETR);
-    REGREAD(RF_CH);
-    REGREAD(RF_SETUP);
-    REGREAD(STATUS);
-    REGREAD(OBSERVE_TX);
+  REGREAD(CONFIG);
+  REGREAD(EN_AA);
+  REGREAD(EN_RXADDR);
+  REGREAD(SETUP_AW);
+  REGREAD(SETUP_RETR);
+  REGREAD(RF_CH);
+  REGREAD(RF_SETUP);
+  REGREAD(STATUS);
+  REGREAD(OBSERVE_TX);
 }
 
 /**
-  * @brief  ÉèÖÃÍ¨ĞÅµØÖ·(5×Ö½Ú)
-  * @param  addr0:µØÖ·µÚ0¸ö×Ö½Ú
-  * @param  addr1:µØÖ·µÚ1¸ö×Ö½Ú
-  * @param  addr2:µØÖ·µÚ2¸ö×Ö½Ú
-  * @param  addr3:µØÖ·µÚ3¸ö×Ö½Ú
-  * @param  addr4:µØÖ·µÚ4¸ö×Ö½Ú
-  * @retval ÎŞ
-  */
+ * @brief  è®¾ç½®é€šä¿¡åœ°å€(5å­—èŠ‚)
+ * @param  addr0:åœ°å€ç¬¬0ä¸ªå­—èŠ‚
+ * @param  addr1:åœ°å€ç¬¬1ä¸ªå­—èŠ‚
+ * @param  addr2:åœ°å€ç¬¬2ä¸ªå­—èŠ‚
+ * @param  addr3:åœ°å€ç¬¬3ä¸ªå­—èŠ‚
+ * @param  addr4:åœ°å€ç¬¬4ä¸ªå­—èŠ‚
+ * @retval æ— 
+ */
 void NRF_Basic::SetAddress(uint8_t addr0, uint8_t addr1, uint8_t addr2, uint8_t addr3, uint8_t addr4)
 {
-    NRF_CE_LOW();
-    RF_Address[0] = addr0;
-    RF_Address[1] = addr1;
-    RF_Address[2] = addr2;
-    RF_Address[3] = addr3;
-    RF_Address[4] = addr4;
+  NRF_CE_LOW();
+  RF_Address[0] = addr0;
+  RF_Address[1] = addr1;
+  RF_Address[2] = addr2;
+  RF_Address[3] = addr3;
+  RF_Address[4] = addr4;
 
-    SPI_Write_Buf(WRITE_REG + TX_ADDR, RF_Address, RF_AddressWidth);
-    SPI_Write_Buf(WRITE_REG + RX_ADDR_P0, RF_Address, RF_AddressWidth);
-    SetRF_Enable(RF_Enabled);
+  SPI_Write_Buf(WRITE_REG + TX_ADDR, RF_Address, RF_AddressWidth);
+  SPI_Write_Buf(WRITE_REG + RX_ADDR_P0, RF_Address, RF_AddressWidth);
+  SetRF_Enable(RF_Enabled);
 }
 
 /**
-  * @brief  ÉèÖÃÍ¨ĞÅµØÖ·(5×Ö½Ú)
-  * @param  addr: Ò»¸ö°üº¬5¸ö×Ö½ÚµÄÊı×éµÄÖ¸Õë
-  * @retval ÎŞ
-  */
-void NRF_Basic::SetAddress(uint8_t* addr)
+ * @brief  è®¾ç½®é€šä¿¡åœ°å€(5å­—èŠ‚)
+ * @param  addr: ä¸€ä¸ªåŒ…å«5ä¸ªå­—èŠ‚çš„æ•°ç»„çš„æŒ‡é’ˆ
+ * @retval æ— 
+ */
+void NRF_Basic::SetAddress(uint8_t *addr)
 {
-    SetAddress(addr[0], addr[1], addr[2], addr[3], addr[4]);
+  SetAddress(addr[0], addr[1], addr[2], addr[3], addr[4]);
 }
 
 /**
-  * @brief  ÉèÖÃ·¢ËÍ¹¦ÂÊ
-  * @param  power: ¹¦ÂÊÖµ(¼ûNRF_Power_TypeDef)
-  * @retval ÎŞ
-  */
+ * @brief  è®¾ç½®å‘é€åŠŸç‡
+ * @param  power: åŠŸç‡å€¼(è§NRF_Power_TypeDef)
+ * @retval æ— 
+ */
 void NRF_Basic::SetPower(Power_Type power)
 {
-    NRF_CE_LOW();
-    REGREAD(RF_SETUP);
-    REG_RF_SETUP.RF_PWR = RF_Power = power;
-    REGWRITE(RF_SETUP);
-    SetRF_Enable(RF_Enabled);
+  NRF_CE_LOW();
+  REGREAD(RF_SETUP);
+  REG_RF_SETUP.RF_PWR = RF_Power = power;
+  REGWRITE(RF_SETUP);
+  SetRF_Enable(RF_Enabled);
 }
 
 /**
-  * @brief  ÉèÖÃÍ¨ĞÅËÙÂÊ
-  * @param  speed:ËÙÂÊ(SPEED_250Kbps,SPEED_1Mbps,SPEED_2Mbps)
-  * @retval ÎŞ
-  */
+ * @brief  è®¾ç½®é€šä¿¡é€Ÿç‡
+ * @param  speed:é€Ÿç‡(SPEED_250Kbps,SPEED_1Mbps,SPEED_2Mbps)
+ * @retval æ— 
+ */
 void NRF_Basic::SetSpeed(Speed_Type speed)
 {
-    NRF_CE_LOW();
-    /* 250Kbps:  31250 Byte/s */
-    /*   1Mbps: 125000 Byte/s */
-    /*   2Mbps: 250000 Byte/s */
-    RF_Speed = speed;
-    REGREAD(RF_SETUP);
-    REG_RF_SETUP.RF_DR_LOW  = (RF_Speed & B10) ? 1 : 0;
-    REG_RF_SETUP.RF_DR_HIGH = (RF_Speed & B01) ? 1 : 0;
-    REGWRITE(RF_SETUP);
-    SetRF_Enable(RF_Enabled);
+  NRF_CE_LOW();
+  /* 250Kbps:  31250 Byte/s */
+  /*   1Mbps: 125000 Byte/s */
+  /*   2Mbps: 250000 Byte/s */
+  RF_Speed = speed;
+  REGREAD(RF_SETUP);
+  REG_RF_SETUP.RF_DR_LOW = (RF_Speed & B10) ? 1 : 0;
+  REG_RF_SETUP.RF_DR_HIGH = (RF_Speed & B01) ? 1 : 0;
+  REGWRITE(RF_SETUP);
+  SetRF_Enable(RF_Enabled);
 }
 
 /**
-  * @brief  ÉèÖÃÍ¨ĞÅÆµÂÊ
-  * @param  freq:ÆµÂÊ(0~125 -> 2.400GHz¡«2.525GHz)
-  * @retval ÎŞ
-  */
+ * @brief  è®¾ç½®é€šä¿¡é¢‘ç‡
+ * @param  freq:é¢‘ç‡(0~125 -> 2.400GHzï½2.525GHz)
+ * @retval æ— 
+ */
 void NRF_Basic::SetFreqency(uint8_t freq)
 {
-    NRF_CE_LOW();
-    /*Channel:0~125*/
-    REG_RF_CH.RF_CH = RF_Freq = freq % 126;
-    REGWRITE(RF_CH);
-    SetRF_Enable(RF_Enabled);
+  NRF_CE_LOW();
+  /*Channel:0~125*/
+  REG_RF_CH.RF_CH = RF_Freq = freq % 126;
+  REGWRITE(RF_CH);
+  SetRF_Enable(RF_Enabled);
 }
 
 /**
-  * @brief  ÉèÖÃ×Ô¶¯ÖØ·¢×ÜÊ±¼ä
-  * @param  timeMs:Ê±¼ä
-  * @retval ÎŞ
-  */
+ * @brief  è®¾ç½®è‡ªåŠ¨é‡å‘æ€»æ—¶é—´
+ * @param  timeMs:æ—¶é—´
+ * @retval æ— 
+ */
 void NRF_Basic::SetAutoRetryTimeout(uint16_t timeMs)
 {
-    /* 250Kbps = 32us/Byte  */
-    uint8_t byteTimeUs = 32;
-    /* 1Mbps = 8us/Byte */
-    if(RF_Speed == SPEED_1Mbps)
-    {
-        byteTimeUs = 8;
-    }
-    /* 2Mbps = 4us/Byte */
-    else if(RF_Speed == SPEED_2Mbps)
-    {
-        byteTimeUs = 4;
-    }
-    
-    //Preamble 1 byte
-    //Address 3-5 byte
-    //Packet Control Field 9 bit
-    //Payload 0 - 32 byte
-    //CRC 1-2 byte
-    uint16_t packByte = 1 + RF_AddressWidth + (9 / 8) + RF_TX_PloadWidth + (REG_CONFIG.CRCO + 1);
-    uint32_t packTimeUs = packByte * byteTimeUs;
-    uint32_t retryCount = (timeMs * 1000) / (packTimeUs + (RF_AutoRetryDelay + 1) * 250);
-    if(retryCount > 15) retryCount = 15;
-    SetAutoRetry(RF_AutoRetryDelay, retryCount);
+  /* 250Kbps = 32us/Byte  */
+  uint8_t byteTimeUs = 32;
+  /* 1Mbps = 8us/Byte */
+  if (RF_Speed == SPEED_1Mbps)
+  {
+    byteTimeUs = 8;
+  }
+  /* 2Mbps = 4us/Byte */
+  else if (RF_Speed == SPEED_2Mbps)
+  {
+    byteTimeUs = 4;
+  }
+
+  // Preamble 1 byte
+  // Address 3-5 byte
+  // Packet Control Field 9 bit
+  // Payload 0 - 32 byte
+  // CRC 1-2 byte
+  uint16_t packByte = 1 + RF_AddressWidth + (9 / 8) + RF_TX_PloadWidth + (REG_CONFIG.CRCO + 1);
+  uint32_t packTimeUs = packByte * byteTimeUs;
+  uint32_t retryCount = (timeMs * 1000) / (packTimeUs + (RF_AutoRetryDelay + 1) * 250);
+  if (retryCount > 15)
+    retryCount = 15;
+  SetAutoRetry(RF_AutoRetryDelay, retryCount);
 }
 
 /**
-  * @brief  ¸ù¾İÊµ¼Ê²âÊÔ½á¹û,ÉèÖÃ×Ô¶¯ÖØ·¢×ÜÊ±¼ä
-  * @param  timeMs:Ê±¼ä
-  * @retval ÎŞ
-  */
+ * @brief  æ ¹æ®å®é™…æµ‹è¯•ç»“æœ,è®¾ç½®è‡ªåŠ¨é‡å‘æ€»æ—¶é—´
+ * @param  timeMs:æ—¶é—´
+ * @retval æ— 
+ */
 void NRF_Basic::SetAutoRetryTimeoutWithTest(uint16_t timeMs)
 {
-    uint32_t timeUs = timeMs * 1000;
-    uint8_t retryCount = 15;
-    uint8_t addrBackup[5];
-    uint8_t RF_State_Backup = RF_State;
-    uint8_t tx_buff[32];
-    
-    NRF_CE_LOW();
-    GetAddress(addrBackup);
-    SetAddress(0xAA, 0xBB, 0xCC, 0xDD, 0xEE);
-    TX_Mode(true);
-    NRF_CE_HIGH();
-    while(1)
+  uint32_t timeUs = timeMs * 1000;
+  uint8_t retryCount = 15;
+  uint8_t addrBackup[5];
+  uint8_t RF_State_Backup = RF_State;
+  uint8_t tx_buff[32];
+
+  NRF_CE_LOW();
+  GetAddress(addrBackup);
+  SetAddress(0xAA, 0xBB, 0xCC, 0xDD, 0xEE);
+  TX_Mode(true);
+  NRF_CE_HIGH();
+  while (1)
+  {
+    Tran(tx_buff);
+    uint32_t timeCost = 0;
+    noInterrupts();
+    uint32_t start = micros();
+    while (TranCheck() == 0)
     {
-        Tran(tx_buff);
-        uint32_t timeCost = 0;
-        noInterrupts();
-        uint32_t start = micros();
-        while(TranCheck() == 0){};
-        timeCost = micros() - start;
-        interrupts();
-        
-        if(timeCost <= timeUs || retryCount < 1)
-        {
-            break;
-        }
-        else
-        {
-            retryCount--;
-            SetAutoRetry(RF_AutoRetryDelay, retryCount);
-            NRF_CE_HIGH();
-        }
-    }
-    if(RF_State_Backup == State_RX)
+    };
+    timeCost = micros() - start;
+    interrupts();
+
+    if (timeCost <= timeUs || retryCount < 1)
     {
-        RX_Mode();
+      break;
     }
-    SetAddress(addrBackup);
-    SetRF_Enable(RF_Enabled);
+    else
+    {
+      retryCount--;
+      SetAutoRetry(RF_AutoRetryDelay, retryCount);
+      NRF_CE_HIGH();
+    }
+  }
+  if (RF_State_Backup == State_RX)
+  {
+    RX_Mode();
+  }
+  SetAddress(addrBackup);
+  SetRF_Enable(RF_Enabled);
 }
 
 /**
-  * @brief  ÉèÖÃ×Ô¶¯ÖØ·¢
-  * @param  delay:×Ô¶¯ÖØ·¢ÑÓÊ±
-  * @param  count:×Ô¶¯ÖØ·¢´ÎÊı
-  * @retval ÎŞ
-  */
+ * @brief  è®¾ç½®è‡ªåŠ¨é‡å‘
+ * @param  delay:è‡ªåŠ¨é‡å‘å»¶æ—¶
+ * @param  count:è‡ªåŠ¨é‡å‘æ¬¡æ•°
+ * @retval æ— 
+ */
 void NRF_Basic::SetAutoRetry(uint8_t delay, uint8_t count)
 {
-    NRF_CE_LOW();
-    REGREAD(SETUP_RETR);
-    REG_SETUP_RETR.ARD = RF_AutoRetryDelay = delay;
-    REG_SETUP_RETR.ARC = RF_AutoRetryCount = count;
-    REGWRITE(SETUP_RETR);
-    
-    /* 250Kbps = 32us/Byte  */
-    uint8_t byteTimeUs = 32;
-    /* 1Mbps = 8us/Byte */
-    if(RF_Speed == SPEED_1Mbps)
-    {
-        byteTimeUs = 8;
-    }
-    /* 2Mbps = 4us/Byte */
-    else if(RF_Speed == SPEED_2Mbps)
-    {
-        byteTimeUs = 4;
-    }
-    uint16_t packByte = 1 + RF_AddressWidth + (9 / 8) + RF_TX_PloadWidth + (REG_CONFIG.CRCO + 1);
-    uint32_t packTimeUs = packByte * byteTimeUs;
-    
-    RF_TimeoutUs = (packTimeUs + (delay + 1) * 250) * count;
-    SetRF_Enable(RF_Enabled);
+  NRF_CE_LOW();
+  REGREAD(SETUP_RETR);
+  REG_SETUP_RETR.ARD = RF_AutoRetryDelay = delay;
+  REG_SETUP_RETR.ARC = RF_AutoRetryCount = count;
+  REGWRITE(SETUP_RETR);
+
+  /* 250Kbps = 32us/Byte  */
+  uint8_t byteTimeUs = 32;
+  /* 1Mbps = 8us/Byte */
+  if (RF_Speed == SPEED_1Mbps)
+  {
+    byteTimeUs = 8;
+  }
+  /* 2Mbps = 4us/Byte */
+  else if (RF_Speed == SPEED_2Mbps)
+  {
+    byteTimeUs = 4;
+  }
+  uint16_t packByte = 1 + RF_AddressWidth + (9 / 8) + RF_TX_PloadWidth + (REG_CONFIG.CRCO + 1);
+  uint32_t packTimeUs = packByte * byteTimeUs;
+
+  RF_TimeoutUs = (packTimeUs + (delay + 1) * 250) * count;
+  SetRF_Enable(RF_Enabled);
 }
 
 /**
-  * @brief  ÉèÖÃ×Ô¶¯·µ»ØACK
-  * @param  en:Ê¹ÄÜ
-  * @retval ÎŞ
-  */
+ * @brief  è®¾ç½®è‡ªåŠ¨è¿”å›ACK
+ * @param  en:ä½¿èƒ½
+ * @retval æ— 
+ */
 void NRF_Basic::SetAutoAck(bool en)
 {
-    NRF_CE_LOW();
-    REGREAD(EN_AA);
-    REG_EN_AA.ENAA_P0 = en;
-    REG_EN_AA.ENAA_P1 = en;
-    REG_EN_AA.ENAA_P2 = en;
-    REG_EN_AA.ENAA_P3 = en;
-    REG_EN_AA.ENAA_P4 = en;
-    REG_EN_AA.ENAA_P5 = en;
-    REGWRITE(EN_AA);
-    SetRF_Enable(RF_Enabled);
+  NRF_CE_LOW();
+  REGREAD(EN_AA);
+  REG_EN_AA.ENAA_P0 = en;
+  REG_EN_AA.ENAA_P1 = en;
+  REG_EN_AA.ENAA_P2 = en;
+  REG_EN_AA.ENAA_P3 = en;
+  REG_EN_AA.ENAA_P4 = en;
+  REG_EN_AA.ENAA_P5 = en;
+  REGWRITE(EN_AA);
+  SetRF_Enable(RF_Enabled);
 }
 
 /**
-  * @brief  ÉèÖÃÊı¾İ°ü³¤¶È
-  * @param  tx_payload:·¢ËÍÊı¾İ°ü³¤¶È
-  * @param  rx_payload:½ÓÊÕÊı¾İ°ü³¤¶È
-  * @retval ÎŞ
-  */
+ * @brief  è®¾ç½®æ•°æ®åŒ…é•¿åº¦
+ * @param  tx_payload:å‘é€æ•°æ®åŒ…é•¿åº¦
+ * @param  rx_payload:æ¥æ”¶æ•°æ®åŒ…é•¿åº¦
+ * @retval æ— 
+ */
 void NRF_Basic::SetPayloadWidth(uint8_t tx_payload, uint8_t rx_payload)
 {
-    NRF_CE_LOW();
-    RF_TX_PloadWidth = tx_payload;
-    RF_RX_PloadWidth = rx_payload;
-    SPI_RW_Reg(WRITE_REG + RX_PW_P0, RF_RX_PloadWidth);
-    SetRF_Enable(RF_Enabled);
+  NRF_CE_LOW();
+  RF_TX_PloadWidth = tx_payload;
+  RF_RX_PloadWidth = rx_payload;
+  SPI_RW_Reg(WRITE_REG + RX_PW_P0, RF_RX_PloadWidth);
+  SetRF_Enable(RF_Enabled);
 }
 
 /**
-  * @brief  ÉèÖÃÉäÆµÊ¹ÄÜ
-  * @param  enable:Ê¹ÄÜ¿ØÖÆ
-  * @retval ÎŞ
-  */
+ * @brief  è®¾ç½®å°„é¢‘ä½¿èƒ½
+ * @param  enable:ä½¿èƒ½æ§åˆ¶
+ * @retval æ— 
+ */
 void NRF_Basic::SetRF_Enable(bool enable)
 {
-    enable ? NRF_CE_HIGH() : NRF_CE_LOW();
-    RF_Enabled = enable;
+  enable ? NRF_CE_HIGH() : NRF_CE_LOW();
+  RF_Enabled = enable;
 }
 
 /**
-  * @brief  »ñÈ¡µ±Ç°Í¨ĞÅµØÖ·
-  * @param  addr:µÚ¼¸Î»µØÖ·
-  * @retval addr¶ÔÓ¦µØÖ·
-  */
+ * @brief  è·å–å½“å‰é€šä¿¡åœ°å€
+ * @param  addr:ç¬¬å‡ ä½åœ°å€
+ * @retval addrå¯¹åº”åœ°å€
+ */
 uint8_t NRF_Basic::GetAddress(uint8_t addr)
 {
-    return RF_Address[addr % sizeof(RF_Address)];
+  return RF_Address[addr % sizeof(RF_Address)];
 }
 
 /**
-  * @brief  »ñÈ¡µ±Ç°Í¨ĞÅµØÖ·
-  * @param  addr:µØÖ·
-  * @param  istx:ÊÇ·ñÎª·¢ËÍµØÖ·
-  * @retval ÎŞ
-  */
+ * @brief  è·å–å½“å‰é€šä¿¡åœ°å€
+ * @param  addr:åœ°å€
+ * @param  istx:æ˜¯å¦ä¸ºå‘é€åœ°å€
+ * @retval æ— 
+ */
 void NRF_Basic::GetAddress(uint8_t *addr, bool istx)
 {
-    if(istx)
-        SPI_Read_Buf(READ_REG + TX_ADDR, addr, RF_AddressWidth);
-    else
-        SPI_Read_Buf(READ_REG + RX_ADDR_P0, addr, RF_AddressWidth);
+  if (istx)
+    SPI_Read_Buf(READ_REG + TX_ADDR, addr, RF_AddressWidth);
+  else
+    SPI_Read_Buf(READ_REG + RX_ADDR_P0, addr, RF_AddressWidth);
 }
 
 /**
-  * @brief  »ñÈ¡µ±Ç°Í¨ĞÅËÙ¶È
-  * @param  ÎŞ
-  * @retval 0~2 -> 250Kbps~2Mbps
-  */
+ * @brief  è·å–å½“å‰é€šä¿¡é€Ÿåº¦
+ * @param  æ— 
+ * @retval 0~2 -> 250Kbps~2Mbps
+ */
 uint8_t NRF_Basic::GetSpeed()
 {
-    /*SPEED_250Kbps*/
-    uint8_t speed = 0;
+  /*SPEED_250Kbps*/
+  uint8_t speed = 0;
 
-    if(RF_Speed == SPEED_1Mbps)
-        speed = 1;
-    else if(RF_Speed == SPEED_2Mbps)
-        speed = 2;
-    
-    return speed;
+  if (RF_Speed == SPEED_1Mbps)
+    speed = 1;
+  else if (RF_Speed == SPEED_2Mbps)
+    speed = 2;
+
+  return speed;
 }
 
 /**
-  * @brief  »ñÈ¡µ±Ç°Í¨ĞÅÆµÂÊ
-  * @param  ÎŞ
-  * @retval ÆµÂÊÖµ(+2400MHz)
-  */
+ * @brief  è·å–å½“å‰é€šä¿¡é¢‘ç‡
+ * @param  æ— 
+ * @retval é¢‘ç‡å€¼(+2400MHz)
+ */
 uint8_t NRF_Basic::GetFreqency()
 {
-    REGREAD(RF_CH);
-    RF_Freq = REG_RF_CH.RF_CH;
-    return RF_Freq;
+  REGREAD(RF_CH);
+  RF_Freq = REG_RF_CH.RF_CH;
+  return RF_Freq;
 }
 
 /**
-  * @brief  SPI¶ÁĞ´
-  * @param  Data:Êı¾İ
-  * @retval SPI·µ»ØµÄÊı¾İ
-  */
+ * @brief  SPIè¯»å†™
+ * @param  Data:æ•°æ®
+ * @retval SPIè¿”å›çš„æ•°æ®
+ */
 uint8_t NRF_Basic::SPI_RW(uint8_t Data)
 {
-    if(hwSPI)//Èç¹ûÊ¹ÓÃÓ²¼şSPI
-    {
+  if (hwSPI) // å¦‚æœä½¿ç”¨ç¡¬ä»¶SPI
+  {
 #ifdef NRF_SPI_OBJECT
-        return (SPI_Transfer(Data));
+    return (SPI_Transfer(Data));
 #else
-        return 0;
+    return 0;
 #endif
-    }
-    else
+  }
+  else
+  {
+    for (uint8_t i = 0; i < 8; i++)
     {
-        for(uint8_t i = 0; i < 8; i++)
-        {
-            (Data & 0x80) ? NRF_MOSI_HIGH() : NRF_MOSI_LOW();
-            NRF_SCK_HIGH();
-            Data <<= 1;
-            if(NRF_MISO_READ()) Data |= 1;
-            NRF_SCK_LOW();
-        }
-        return Data;
+      (Data & 0x80) ? NRF_MOSI_HIGH() : NRF_MOSI_LOW();
+      NRF_SCK_HIGH();
+      Data <<= 1;
+      if (NRF_MISO_READ())
+        Data |= 1;
+      NRF_SCK_LOW();
     }
+    return Data;
+  }
 }
 
 /**
-  * @brief  ¶ÁĞ´¼Ä´æÆ÷
-  * @param  reg:¼Ä´æÆ÷
-  * @param  value:Öµ
-  * @retval ¼Ä´æÆ÷µÄ×´Ì¬
-  */
+ * @brief  è¯»å†™å¯„å­˜å™¨
+ * @param  reg:å¯„å­˜å™¨
+ * @param  value:å€¼
+ * @retval å¯„å­˜å™¨çš„çŠ¶æ€
+ */
 uint8_t NRF_Basic::SPI_RW_Reg(uint8_t reg, uint8_t value)
 {
-    NRF_CSN_LOW();
-    uint8_t status = SPI_RW(reg);
-    SPI_RW(value);
-    NRF_CSN_HIGH();
-    return status;
+  NRF_CSN_LOW();
+  uint8_t status = SPI_RW(reg);
+  SPI_RW(value);
+  NRF_CSN_HIGH();
+  return status;
 }
 
 /**
-  * @brief  ¶Á¼Ä´æÆ÷
-  * @param  reg:¼Ä´æÆ÷
-  * @retval ¼Ä´æÆ÷µÄ×´Ì¬
-  */
+ * @brief  è¯»å¯„å­˜å™¨
+ * @param  reg:å¯„å­˜å™¨
+ * @retval å¯„å­˜å™¨çš„çŠ¶æ€
+ */
 uint8_t NRF_Basic::SPI_Read(uint8_t reg)
 {
-    NRF_CSN_LOW();
-    SPI_RW(reg);
-    uint8_t reg_val = SPI_RW(0);
-    NRF_CSN_HIGH();
-    return reg_val;
+  NRF_CSN_LOW();
+  SPI_RW(reg);
+  uint8_t reg_val = SPI_RW(0);
+  NRF_CSN_HIGH();
+  return reg_val;
 }
 
 /**
-  * @brief  ¶Á×´Ì¬
-  * @param  ÎŞ
-  * @retval ×´Ì¬¼Ä´æÆ÷µÄÖµ
-  */
+ * @brief  è¯»çŠ¶æ€
+ * @param  æ— 
+ * @retval çŠ¶æ€å¯„å­˜å™¨çš„å€¼
+ */
 uint8_t NRF_Basic::GetStatus(void)
 {
-    REGREAD(STATUS);
-    return REG2U8(REG_STATUS);
+  REGREAD(STATUS);
+  return REG2U8(REG_STATUS);
 }
 
 /**
-  * @brief  Çå×´Ì¬¼Ä´æÆ÷±êÖ¾Î»
-  * @param  ÎŞ
-  * @retval ÎŞ
-  */
+ * @brief  æ¸…çŠ¶æ€å¯„å­˜å™¨æ ‡å¿—ä½
+ * @param  æ— 
+ * @retval æ— 
+ */
 void NRF_Basic::ClearFlag()
 {
-    REGREAD(STATUS);
-    REG_STATUS.RX_DR = 1;
-    REG_STATUS.TX_DS = 1;
-    REG_STATUS.MAX_RT = 1;
-    REGWRITE(STATUS);
+  REGREAD(STATUS);
+  REG_STATUS.RX_DR = 1;
+  REG_STATUS.TX_DS = 1;
+  REG_STATUS.MAX_RT = 1;
+  REGWRITE(STATUS);
 }
 
 /**
-  * @brief  ÅĞ¶ÏÓ²¼şÁ¬ÏßÊÇ·ñÕıÈ·
-  * @param  ÎŞ
-  * @retval true ÒÑÕıÈ·Á¬½Ó; false Á¬½Ó²»ÕıÈ·
-  */
+ * @brief  åˆ¤æ–­ç¡¬ä»¶è¿çº¿æ˜¯å¦æ­£ç¡®
+ * @param  æ— 
+ * @retval true å·²æ­£ç¡®è¿æ¥; false è¿æ¥ä¸æ­£ç¡®
+ */
 bool NRF_Basic::IsDetect()
 {
-    uint8_t detect = true;
-    uint8_t addr[sizeof(RF_Address)] = {0};
-    memcpy(addr, RF_Address, sizeof(addr));
-    SetAddress(0, 1, 2, 3, 4);
-    GetAddress(RF_Address);
-    for(uint8_t i = 0;i < RF_AddressWidth;i++)
+  uint8_t detect = true;
+  uint8_t addr[sizeof(RF_Address)] = {0};
+  memcpy(addr, RF_Address, sizeof(addr));
+  SetAddress(0, 1, 2, 3, 4);
+  GetAddress(RF_Address);
+  for (uint8_t i = 0; i < RF_AddressWidth; i++)
+  {
+    if (RF_Address[i] != i)
     {
-        if(RF_Address[i] != i)
-        {
-            detect = false;
-        }
+      detect = false;
     }
-    SetAddress(addr);
-    
-    return detect;
+  }
+  SetAddress(addr);
+
+  return detect;
 }
 
 /**
-  * @brief  Ğ´ÈëÒ»´®Êı¾İµ½¼Ä´æÆ÷
-  * @param  reg:¼Ä´æÆ÷
-  * @param  *pBuf:Êı×éÍ·µØÖ·
-  * @param  bytes:Êı¾İ×Ö½ÚÊı
-  * @retval ¼Ä´æÆ÷µÄ×´Ì¬
-  */
+ * @brief  å†™å…¥ä¸€ä¸²æ•°æ®åˆ°å¯„å­˜å™¨
+ * @param  reg:å¯„å­˜å™¨
+ * @param  *pBuf:æ•°ç»„å¤´åœ°å€
+ * @param  bytes:æ•°æ®å­—èŠ‚æ•°
+ * @retval å¯„å­˜å™¨çš„çŠ¶æ€
+ */
 uint8_t NRF_Basic::SPI_Write_Buf(uint8_t reg, uint8_t *pBuf, uint8_t bytes)
 {
-    uint8_t status;
+  uint8_t status;
 
-    NRF_CSN_LOW();
-    status = SPI_RW(reg);
-    for(uint8_t i = 0; i < bytes; i++) SPI_RW(*pBuf++);
-    NRF_CSN_HIGH();
-    return status;
+  NRF_CSN_LOW();
+  status = SPI_RW(reg);
+  for (uint8_t i = 0; i < bytes; i++)
+    SPI_RW(*pBuf++);
+  NRF_CSN_HIGH();
+  return status;
 }
 
 /**
-  * @brief  ¶ÁÈëÒ»´®Êı¾İµ½NRF_Basic¼Ä´æÆ÷
-  * @param  reg:¼Ä´æÆ÷
-  * @param  *pBuf:Êı×éÍ·µØÖ·
-  * @param  bytes:Êı¾İ×Ö½ÚÊı
-  * @retval ¼Ä´æÆ÷µÄ×´Ì¬
-  */
+ * @brief  è¯»å…¥ä¸€ä¸²æ•°æ®åˆ°NRF_Basicå¯„å­˜å™¨
+ * @param  reg:å¯„å­˜å™¨
+ * @param  *pBuf:æ•°ç»„å¤´åœ°å€
+ * @param  bytes:æ•°æ®å­—èŠ‚æ•°
+ * @retval å¯„å­˜å™¨çš„çŠ¶æ€
+ */
 uint8_t NRF_Basic::SPI_Read_Buf(uint8_t reg, uint8_t *pBuf, uint8_t bytes)
 {
-    NRF_CSN_LOW();
-    uint8_t status = SPI_RW(reg);
-    for(uint8_t i = 0; i < bytes; i++) pBuf[i] = SPI_RW(0);
-    NRF_CSN_HIGH();
-    return status;
+  NRF_CSN_LOW();
+  uint8_t status = SPI_RW(reg);
+  for (uint8_t i = 0; i < bytes; i++)
+    pBuf[i] = SPI_RW(0);
+  NRF_CSN_HIGH();
+  return status;
 }
 
 /**
-  * @brief  ÉèÖÃÎª·¢ËÍÄ£Ê½
-  * @param  rfDelay:ÊÇ·ñÑÓÊ±
-  * @retval ÎŞ
-  */
+ * @brief  è®¾ç½®ä¸ºå‘é€æ¨¡å¼
+ * @param  rfDelay:æ˜¯å¦å»¶æ—¶
+ * @retval æ— 
+ */
 void NRF_Basic::TX_Mode(bool rfDelay)
 {
-    RF_State = State_TX;
-    
-    NRF_CE_LOW();
-    ClearFlag();
-    REG_CONFIG.PRIM_RX = 0;
-    REGWRITE(CONFIG);
-    
-    if(rfDelay)
-    {
-        delayMicroseconds(130);
-    }
-    
-    SetRF_Enable(RF_Enabled);
+  RF_State = State_TX;
+
+  NRF_CE_LOW();
+  ClearFlag();
+  REG_CONFIG.PRIM_RX = 0;
+  REGWRITE(CONFIG);
+
+  if (rfDelay)
+  {
+    delayMicroseconds(130);
+  }
+
+  SetRF_Enable(RF_Enabled);
 }
 
 /**
-  * @brief  ÉèÖÃÎª½ÓÊÕÄ£Ê½
-  * @param  ÎŞ
-  * @retval ÎŞ
-  */
+ * @brief  è®¾ç½®ä¸ºæ¥æ”¶æ¨¡å¼
+ * @param  æ— 
+ * @retval æ— 
+ */
 void NRF_Basic::RX_Mode(bool rfDelay)
 {
-    RF_State = State_RX;
-    
-    NRF_CE_LOW();
-    ClearFlag();
-    REG_CONFIG.PRIM_RX = 1;
-    REGWRITE(CONFIG);
-    
-    if(rfDelay)
-    {
-        delayMicroseconds(130);
-    }
-    
-    SetRF_Enable(RF_Enabled);
+  RF_State = State_RX;
+
+  NRF_CE_LOW();
+  ClearFlag();
+  REG_CONFIG.PRIM_RX = 1;
+  REGWRITE(CONFIG);
+
+  if (rfDelay)
+  {
+    delayMicroseconds(130);
+  }
+
+  SetRF_Enable(RF_Enabled);
 }
 
 /**
-  * @brief  ÉèÖÃÉÏµç
-  * @param  ÎŞ
-  * @retval ÎŞ
-  */
+ * @brief  è®¾ç½®ä¸Šç”µ
+ * @param  æ— 
+ * @retval æ— 
+ */
 void NRF_Basic::SetPowerUp(bool en)
 {
-    NRF_CE_LOW();
-    REGREAD(CONFIG);
-    if(en)
-    {
-        REG_CONFIG.PWR_UP = 1;
-    }
-    else
-    {
-        REG2U8(REG_CONFIG) = 0;
-        REG_CONFIG.EN_CRC = 1;
-        RF_Enabled = false;
-    }
-    REGWRITE(CONFIG);
-    SetRF_Enable(RF_Enabled);
+  NRF_CE_LOW();
+  REGREAD(CONFIG);
+  if (en)
+  {
+    REG_CONFIG.PWR_UP = 1;
+  }
+  else
+  {
+    REG2U8(REG_CONFIG) = 0;
+    REG_CONFIG.EN_CRC = 1;
+    RF_Enabled = false;
+  }
+  REGWRITE(CONFIG);
+  SetRF_Enable(RF_Enabled);
 }
 
 /**
-  * @brief  ·¢ËÍ»º³åÇøÊı¾İ
-  * @param  *txbuff:·¢ËÍ»º³åÇøµØÖ·
-  * @retval ÎŞ
-  */
-void NRF_Basic::Tran(void* txbuff)
-{  
-    /*Çå±êÖ¾Î»*/
-    ClearFlag();
-    /*Çå»º³åÇø*/
-    SPI_RW_Reg(FLUSH_TX, 0);
-    /*·¢ËÍÊı¾İ*/
-    SPI_Write_Buf(W_TX_PLOAD, (uint8_t*)txbuff, RF_TX_PloadWidth);
-    /*·¢ËÍ¼ÆÊı++*/
-    RF_TranCnt++;
+ * @brief  å‘é€ç¼“å†²åŒºæ•°æ®
+ * @param  *txbuff:å‘é€ç¼“å†²åŒºåœ°å€
+ * @retval æ— 
+ */
+void NRF_Basic::Tran(void *txbuff)
+{
+  /*æ¸…æ ‡å¿—ä½*/
+  ClearFlag();
+  /*æ¸…ç¼“å†²åŒº*/
+  SPI_RW_Reg(FLUSH_TX, 0);
+  /*å‘é€æ•°æ®*/
+  SPI_Write_Buf(W_TX_PLOAD, (uint8_t *)txbuff, RF_TX_PloadWidth);
+  /*å‘é€è®¡æ•°++*/
+  RF_TranCnt++;
 }
 
 /**
-  * @brief  ·¢ËÍ¼ì²é
-  * @param  ÎŞ
-  * @retval 1:·¢ËÍ³É¹¦ -1:·¢ËÍ³¬Ê±
-  */
+ * @brief  å‘é€æ£€æŸ¥
+ * @param  æ— 
+ * @retval 1:å‘é€æˆåŠŸ -1:å‘é€è¶…æ—¶
+ */
 int8_t NRF_Basic::TranCheck()
 {
-    int8_t retval = 0;
-    /*¶ÁÈ¡×´Ì¬¼Ä´æÆ÷*/
-    REGREAD(STATUS);
-    /*ÊÇ·ñ·¢ËÍ³É¹¦»ò·¢ËÍ³¬Ê±*/
-    if(REG_STATUS.TX_DS || REG_STATUS.MAX_RT)
+  int8_t retval = 0;
+  /*è¯»å–çŠ¶æ€å¯„å­˜å™¨*/
+  REGREAD(STATUS);
+  /*æ˜¯å¦å‘é€æˆåŠŸæˆ–å‘é€è¶…æ—¶*/
+  if (REG_STATUS.TX_DS || REG_STATUS.MAX_RT)
+  {
+    /*æ˜¯å¦è¶…æ—¶*/
+    if (REG_STATUS.MAX_RT)
     {
-        /*ÊÇ·ñ³¬Ê±*/
-        if(REG_STATUS.MAX_RT)
-        {
-            retval = -1;
-        }
-        /*ÊÇ·ñ·¢ËÍ³É¹¦*/
-        else if(REG_STATUS.TX_DS)
-        {
-            /*·¢ËÍ³É¹¦¼ÆÊı++*/
-            RF_TranSuccessCnt ++;
-            retval = 1;
-        }
-        /*Çå×´Ì¬¼Ä´æÆ÷±êÖ¾Î»*/
-        REGWRITE(STATUS);
+      retval = -1;
     }
-    return retval;
-}
-
-/**
-  * @brief  ½ÓÊÕÊı¾İµ½½ÓÊÕ»º³åÇø
-  * @param  *rxbuff:½ÓÊÕ»º³åÇøµØÖ·
-  * @retval ÊÇ·ñÊÕµ½Êı¾İ
-  */
-bool NRF_Basic::Recv(void* rxbuff)
-{
-    bool retval = false;
-    /*¶ÁÈ¡×´Ì¬¼Ä´æÆ÷*/
-    REGREAD(STATUS);
-    
-    /*ÊÇ·ñ½ÓÊÕ³É¹¦*/
-    if(REG_STATUS.RX_DR)
+    /*æ˜¯å¦å‘é€æˆåŠŸ*/
+    else if (REG_STATUS.TX_DS)
     {
-        /*´Ó»º³åÇøÈ¡³öÊı¾İ*/
-        SPI_Read_Buf(R_RX_PLOAD, (uint8_t*)rxbuff, RF_RX_PloadWidth);
-        /*Çå½ÓÊÕ»º³åÇø*/
-        SPI_RW_Reg(FLUSH_RX, 0);
-        /*Çå×´Ì¬¼Ä´æÆ÷±êÖ¾Î»*/
-        REGWRITE(STATUS);
-        
-        retval = true;
-    }    
-    return retval;
+      /*å‘é€æˆåŠŸè®¡æ•°++*/
+      RF_TranSuccessCnt++;
+      retval = 1;
+    }
+    /*æ¸…çŠ¶æ€å¯„å­˜å™¨æ ‡å¿—ä½*/
+    REGWRITE(STATUS);
+  }
+  return retval;
 }
 
 /**
-  * @brief  »ñÈ¡ĞÅºÅÇ¿¶È(·¢ËÍ³É¹¦ÂÊ)
-  * @param  ÎŞ
-  * @retval ĞÅºÅÇ¿¶È(0~100%)
-  */
+ * @brief  æ¥æ”¶æ•°æ®åˆ°æ¥æ”¶ç¼“å†²åŒº
+ * @param  *rxbuff:æ¥æ”¶ç¼“å†²åŒºåœ°å€
+ * @retval æ˜¯å¦æ”¶åˆ°æ•°æ®
+ */
+bool NRF_Basic::Recv(void *rxbuff)
+{
+  bool retval = false;
+  /*è¯»å–çŠ¶æ€å¯„å­˜å™¨*/
+  REGREAD(STATUS);
+
+  /*æ˜¯å¦æ¥æ”¶æˆåŠŸ*/
+  if (REG_STATUS.RX_DR)
+  {
+    /*ä»ç¼“å†²åŒºå–å‡ºæ•°æ®*/
+    SPI_Read_Buf(R_RX_PLOAD, (uint8_t *)rxbuff, RF_RX_PloadWidth);
+    /*æ¸…æ¥æ”¶ç¼“å†²åŒº*/
+    SPI_RW_Reg(FLUSH_RX, 0);
+    /*æ¸…çŠ¶æ€å¯„å­˜å™¨æ ‡å¿—ä½*/
+    REGWRITE(STATUS);
+
+    retval = true;
+  }
+  return retval;
+}
+
+/**
+ * @brief  è·å–ä¿¡å·å¼ºåº¦(å‘é€æˆåŠŸç‡)
+ * @param  æ— 
+ * @retval ä¿¡å·å¼ºåº¦(0~100%)
+ */
 uint8_t NRF_Basic::GetRSSI()
 {
-    if(RF_TranCnt == 0) return 0;
+  if (RF_TranCnt == 0)
+    return 0;
 
-    /*·¢ËÍ³É¹¦´ÎÊı ³ıÒÔ ·¢ËÍ×Ü´ÎÊı * 100% */
-    int rssi = RF_TranSuccessCnt * 100 / RF_TranCnt;
-    
-    if(rssi > 100)
-        rssi = 100;
-    
-    RF_TranSuccessCnt = RF_TranCnt = 0;
-    RF_RSSI = rssi;
-    return rssi;
+  /*å‘é€æˆåŠŸæ¬¡æ•° é™¤ä»¥ å‘é€æ€»æ¬¡æ•° * 100% */
+  int rssi = RF_TranSuccessCnt * 100 / RF_TranCnt;
+
+  if (rssi > 100)
+    rssi = 100;
+
+  RF_TranSuccessCnt = RF_TranCnt = 0;
+  RF_RSSI = rssi;
+  return rssi;
 }
