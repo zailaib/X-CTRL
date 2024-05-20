@@ -3,6 +3,7 @@
 #include "Communication/ComPrivate.h"
 #include "MillisTaskManager/MillisTaskManager.h"
 
+// 遥控器 信号发射器代码住函数入口
 // 实例化任务管理器
 static MillisTaskManager mtmMain(true);
 
@@ -23,6 +24,8 @@ static void setup()
     mtmMain.Register(Button_Update, 20);
     mtmMain.Register(IMU_Update, 20);
     mtmMain.Register(Audio_Update, 20);
+
+    // 遥控器的震动马达(**不是**小车🚗的马达哈)
     mtmMain.Register(MotorLRA_Update, 20);
 
     // 定时器中断回调函数

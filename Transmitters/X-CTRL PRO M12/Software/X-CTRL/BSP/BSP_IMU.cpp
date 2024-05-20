@@ -168,12 +168,18 @@ void IMU_Init()
 
 /**
  * @brief  IMU处理任务
+ * IMU代表惯性测量单元（Inertial Measurement Unit）。
+ * IMU是一种集成了多个传感器的装置
+ * 用于测量和提供关于物体的姿态、加速度和角速度等信息。
+ * 加速度计（Accelerometer）：测量物体在三个轴向上的加速度，用于确定物体的线性加速度和倾斜角度。
+ * 陀螺仪（Gyroscope）：测量物体绕三个轴向上的角速度，用于检测物体的旋转和转动。
+ * 磁力计（Magnetometer）：测量物体周围的磁场强度，用于确定物体的方向和方位。
  * @param  无
  * @retval 无
  */
 void IMU_Update()
 {
-    if (!CTRL.State->IMU)
+    if (!CTRL.State->IMU) // 访问指针类型成员变量 判断状态 IMU是否开启 
     {
         if (!IsAxisChannelReset)
         {
@@ -187,8 +193,14 @@ void IMU_Update()
         return;
 
     int16_t ax, ay, az, gx, gy, gz;
+
+    // 从IMU传感器（可能是MPU系列的传感器）中获取加速度计和陀螺仪的6轴（三轴加速度和三轴角速度）原始数据，并将其存储在相应的变量中
     mpu.getMotion6(&ax, &ay, &az, &gx, &gy, &gz);
+
+    // 这个函数对陀螺仪的原始数据进行校准
     IMU_Calibrate(&gx, &gy, &gz);
+    // 将经过校准的加速度计和陀螺仪数据传递给姿态更新函数。它可能会将角度数据转换为弧度，并更新姿态信息。
     IMU_NormUpdate(IMU_RAD(ay), IMU_RAD(ax), IMU_RAD(-az), IMU_RAD(gy), IMU_RAD(gx), IMU_RAD(-gz));
+    // 这个函数执行通道数据的更新操作。可能会根据需要对通道数据进行处理或转换。
     IMU_ChannelUpdate();
 }
