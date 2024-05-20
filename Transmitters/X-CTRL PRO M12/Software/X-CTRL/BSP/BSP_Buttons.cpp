@@ -4,46 +4,46 @@
 
 ButtonEvent btGrp[BTN_IDX_MAX];
 
-static void ButtonEvent_Handler(ButtonEvent* btn, int event)
+static void ButtonEvent_Handler(ButtonEvent *btn, int event)
 {
-    if(btn == &btPOWER)
+    if (btn == &btPOWER)
     {
-        if(event == ButtonEvent::EVENT_ButtonPress)
+        if (event == ButtonEvent::EVENT_ButtonPress)
         {
             MotorLRA_Vibrate(1, 50);
         }
-        if(event == ButtonEvent::EVENT_ButtonLongPressed)
+        if (event == ButtonEvent::EVENT_ButtonLongPressed)
         {
-            if(EEPROM_SaveAll())
+            if (EEPROM_SaveAll())
             {
                 MotorLRA_Vibrate(1, 200);
-            }                
+            }
             Power_Shutdown();
         }
-        if(event == ButtonEvent::EVENT_ButtonDoubleClick)
+        if (event == ButtonEvent::EVENT_ButtonDoubleClick)
         {
-            if(btUPL && btDOWNL)
+            if (btUPL && btDOWNL)
             {
                 Audio_PlayMusic(MC_Type::MC_Astronomia);
             }
         }
     }
-    
+
     uint8_t keyVal;
-    if(event == ButtonEvent::EVENT_ButtonPress)
+    if (event == ButtonEvent::EVENT_ButtonPress)
     {
-        Audio_Tone(500, 20);//²¥·Å²Ù×÷Òô(500Hz, ³ÖĞø20ms)
+        Audio_Tone(500, 20); // æ’­æ”¾æ“ä½œéŸ³(500Hz, æŒç»­20ms)
         keyVal = 1;
     }
-    else if(event == ButtonEvent::EVENT_ButtonRelease)
+    else if (event == ButtonEvent::EVENT_ButtonRelease)
     {
-        Audio_Tone(700, 20);//²¥·Å²Ù×÷Òô(700Hz, ³ÖĞø20ms)
+        Audio_Tone(700, 20); // æ’­æ”¾æ“ä½œéŸ³(700Hz, æŒç»­20ms)
         keyVal = 0;
     }
     else
         goto PageEvent;
-    
-    /*¶ÔÓ¦µÄCTRL°´¼ü±êÖ¾Î»*/
+
+    /*å¯¹åº”çš„CTRLæŒ‰é”®æ ‡å¿—ä½*/
     if (btn == &btUP)
         CTRL.Key.Bit.BT_UP = keyVal;
     if (btn == &btDOWN)
@@ -52,44 +52,45 @@ static void ButtonEvent_Handler(ButtonEvent* btn, int event)
         CTRL.Key.Bit.BT_OK = keyVal;
     if (btn == &btBACK)
         CTRL.Key.Bit.BT_BACK = keyVal;
-    
+
     if (btn == &btUPL)
         CTRL.Key.Bit.BT_L1 = keyVal;
     if (btn == &btDOWNL)
         CTRL.Key.Bit.BT_R1 = keyVal;
 
 PageEvent:
-    /*´«µİµ½Ò³ÃæÊÂ¼ş*/
+    /*ä¼ é€’åˆ°é¡µé¢äº‹ä»¶*/
     page.PageEventTransmit(btn, event);
 }
 
 void Button_Init()
 {
     DEBUG_FUNC_LOG();
-    
-    /*HC165Òı½Å³õÊ¼»¯*/
+
+    /*HC165å¼•è„šåˆå§‹åŒ–*/
     pinMode(HC165_OUT_Pin, INPUT);
     pinMode(HC165_CP_Pin, OUTPUT);
     pinMode(HC165_PL_Pin, OUTPUT);
-    
+
     __LoopExecute(btGrp[i].EventAttach(ButtonEvent_Handler), __Sizeof(btGrp));
     Switch_Init();
 }
 
-typedef enum{
-    BTN_L_UP    = 0x0200,
-    BTN_L_DOWN  = 0x0100,
-    BTN_R_UP1   = 0x0002,
+typedef enum
+{
+    BTN_L_UP = 0x0200,
+    BTN_L_DOWN = 0x0100,
+    BTN_R_UP1 = 0x0002,
     BTN_R_DOWN1 = 0x0001,
-    BTN_R_UP2   = 0x0008,
+    BTN_R_UP2 = 0x0008,
     BTN_R_DOWN2 = 0x0004,
-}ButtonBit_Type;
+} ButtonBit_Type;
 
 /**
-  * @brief  »ñÈ¡HC165µÄÖµ
-  * @param  ÎŞ
-  * @retval ÎŞ
-  */
+ * @brief  è·å–HC165çš„å€¼
+ * @param  æ— 
+ * @retval æ— 
+ */
 static uint16_t Button_GetHC165Value()
 {
     digitalWrite(HC165_CP_Pin, HIGH);
@@ -103,7 +104,7 @@ static uint16_t Button_GetHC165Value()
 void Button_Update()
 {
     uint16_t ButtonVal = Button_GetHC165Value();
-    
+
     btUP.EventMonitor(bool(ButtonVal & BTN_R_UP1));
     btDOWN.EventMonitor(bool(ButtonVal & BTN_R_DOWN2));
     btOK.EventMonitor(bool(ButtonVal & BTN_R_DOWN1));
@@ -111,6 +112,6 @@ void Button_Update()
     btUPL.EventMonitor(bool(ButtonVal & BTN_L_UP));
     btDOWNL.EventMonitor(bool(ButtonVal & BTN_L_DOWN));
     btPOWER.EventMonitor(!digitalRead(CHG_KEY_Pin));
-    
+
     Switch_Update(ButtonVal);
 }

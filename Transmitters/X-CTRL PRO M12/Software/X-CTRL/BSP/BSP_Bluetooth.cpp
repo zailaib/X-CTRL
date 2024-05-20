@@ -2,13 +2,13 @@
 #include "BSP.h"
 #include "Bluetooth_HC05/Bluetooth_HC05.h"
 
-/*实例化HC05蓝牙对象*/
+/*瀹炰緥鍖朒C05钃濈墮瀵硅薄*/
 static Bluetooth_HC05 hc05(&BT_Serial, BT_State_Pin, BT_EN_Pin, BT_Power_Pin);
 
-/*蓝牙可选波特率*/
+/*钃濈墮鍙�夋尝鐗圭巼*/
 static const uint32_t UseBaudRate[] = {1200, 2400, 4800, 9600, 14400, 19200, 38400, 43000, 57600, 76800, 115200};
 
-/*蓝牙可选波特率个数*/
+/*钃濈墮鍙�夋尝鐗圭巼涓暟*/
 #define UseBaudRate_Size __Sizeof(UseBaudRate)
 
 void Bluetooth_Init()

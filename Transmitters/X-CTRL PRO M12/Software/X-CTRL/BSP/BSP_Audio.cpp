@@ -3,7 +3,7 @@
 
 using namespace MusicPlayer_Type;
 
-/*Òô·ûÆµÂÊ¶ÔÓ¦±í*/
+/*éŸ³ç¬¦é¢‘çŽ‡å¯¹åº”è¡¨*/
 typedef enum
 {
     L1 = 262,
@@ -46,262 +46,262 @@ typedef enum
 
 static void MusicPlayer_Callback(uint32_t freq, uint16_t volume)
 {
-//    tone(Audio_Pin, freq);
+    //    tone(Audio_Pin, freq);
     MotorLRA_Tone(freq);
 }
 
-/*ÊµÀý»¯ÒôÀÖ²¥·ÅÆ÷*/
+/*å®žä¾‹åŒ–éŸ³ä¹æ’­æ”¾å™¨*/
 static MusicPlayer player(MusicPlayer_Callback);
 
 #define ASTR_T_TIME 180
 #define ASTR_S_TIME 20
-static const MusicCode_t MC_Astronomia[] = 
-{
-    /*1-1*/
-    {M4, ASTR_T_TIME},
-    {0, ASTR_S_TIME},
-    {M4, ASTR_T_TIME},
-    {0, ASTR_S_TIME},
-    {M4, ASTR_T_TIME},
-    {0, ASTR_S_TIME},
-    {M4, ASTR_T_TIME},
-    {0, ASTR_S_TIME},
-    {M6, ASTR_T_TIME},
-    {0, ASTR_S_TIME},
-    {M6, ASTR_T_TIME},
-    {0, ASTR_S_TIME},
-    {M6, ASTR_T_TIME},
-    {0, ASTR_S_TIME},
-    {M6, ASTR_T_TIME},
-    {0, ASTR_S_TIME},
-    
-    /*1-2*/
-    {M5, ASTR_T_TIME},
-    {0, ASTR_S_TIME},
-    {M5, ASTR_T_TIME},
-    {0, ASTR_S_TIME},
-    {M5, ASTR_T_TIME},
-    {0, ASTR_S_TIME},
-    {M5, ASTR_T_TIME},
-    {0, ASTR_S_TIME},
-    {H1, ASTR_T_TIME},
-    {0, ASTR_S_TIME},
-    {H1, ASTR_T_TIME},
-    {0, ASTR_S_TIME},
-    {H1, ASTR_T_TIME},
-    {0, ASTR_S_TIME},
-    {H1, ASTR_T_TIME},
-    {0, ASTR_S_TIME},
-    
-    /*1-3*/
-    {H2, ASTR_T_TIME},
-    {0, ASTR_S_TIME},
-    {H2, ASTR_T_TIME},
-    {0, ASTR_S_TIME},
-    {H2, ASTR_T_TIME},
-    {0, ASTR_S_TIME},
-    {H2, ASTR_T_TIME},
-    {0, ASTR_S_TIME},
-    {H2, ASTR_T_TIME},
-    {0, ASTR_S_TIME},
-    {H2, ASTR_T_TIME},
-    {0, ASTR_S_TIME},
-    {H2, ASTR_T_TIME},
-    {0, ASTR_S_TIME},
-    {H2, ASTR_T_TIME},
-    {0, ASTR_S_TIME},
-    
-    /*1-4*/
-    {M5, ASTR_T_TIME},
-    {M4, ASTR_T_TIME},
-    {M3, ASTR_T_TIME},
-    {M1, ASTR_T_TIME},
-    {M2, ASTR_T_TIME},
-    {0, ASTR_T_TIME},
-    {M2, ASTR_T_TIME},
-    {M6, ASTR_T_TIME},
-    
-    /*2-1*/
-    {M5, ASTR_T_TIME},
-    {0, ASTR_T_TIME},
-    {M4, ASTR_T_TIME},
-    {0, ASTR_T_TIME},
-    {M3, ASTR_T_TIME},
-    {0, ASTR_T_TIME},
-    {M3, ASTR_T_TIME},
-    {M3, ASTR_T_TIME},
-    
-    /*2-2*/
-    {M5, ASTR_T_TIME},
-    {0, ASTR_T_TIME},
-    {M4, ASTR_T_TIME},
-    {M3, ASTR_T_TIME},
-    {M2, ASTR_T_TIME},
-    {0, ASTR_T_TIME},
-    {M2, ASTR_T_TIME},
-    {H4, ASTR_T_TIME},
-    
-    /*2-3*/
-    {H3, ASTR_T_TIME},
-    {H4, ASTR_T_TIME},
-    {H3, ASTR_T_TIME},
-    {H4, ASTR_T_TIME},
-    {M2, ASTR_T_TIME},
-    {0, ASTR_T_TIME},
-    {M2, ASTR_T_TIME},
-    {H4, ASTR_T_TIME},
-    
-    /*2-4*/
-    {H3, ASTR_T_TIME},
-    {H4, ASTR_T_TIME},
-    {H3, ASTR_T_TIME},
-    {H4, ASTR_T_TIME},
-    {M2, ASTR_T_TIME},
-    {0, ASTR_T_TIME},
-    {M2, ASTR_T_TIME},
-    {M6, ASTR_T_TIME},
-    
-    /*3-1*/
-    {M5, ASTR_T_TIME},
-    {0, ASTR_T_TIME},
-    {M4, ASTR_T_TIME},
-    {0, ASTR_T_TIME},
-    {M3, ASTR_T_TIME},
-    {0, ASTR_T_TIME},
-    {M3, ASTR_T_TIME},
-    {M3, ASTR_T_TIME},
-    
-    /*3-2*/
-    {M5, ASTR_T_TIME},
-    {0, ASTR_T_TIME},
-    {M4, ASTR_T_TIME},
-    {M3, ASTR_T_TIME},
-    {M2, ASTR_T_TIME},
-    {0, ASTR_T_TIME},
-    {M2, ASTR_T_TIME},
-    {H4, ASTR_T_TIME},
-    
-    /*3-3*/
-    {H3, ASTR_T_TIME},
-    {H4, ASTR_T_TIME},
-    {H3, ASTR_T_TIME},
-    {H4, ASTR_T_TIME},
-    {M2, ASTR_T_TIME},
-    {0, ASTR_T_TIME},
-    {M2, ASTR_T_TIME},
-    {H4, ASTR_T_TIME},
-    
-    /*3-4*/
-    {H3, ASTR_T_TIME},
-    {H4, ASTR_T_TIME},
-    {H3, ASTR_T_TIME},
-    {H4, ASTR_T_TIME},
-    {M4, ASTR_T_TIME},
-    {M4, ASTR_T_TIME},
-    {M4, ASTR_T_TIME},
-    {M4, ASTR_T_TIME},
-    
-    /*4-1*/
-    {M6, ASTR_T_TIME},
-    {M6, ASTR_T_TIME},
-    {M6, ASTR_T_TIME},
-    {M6, ASTR_T_TIME},
-    {M5, ASTR_T_TIME},
-    {M5, ASTR_T_TIME},
-    {M5, ASTR_T_TIME},
-    {M5, ASTR_T_TIME},
-    
-    /*4-2*/
-    {H1, ASTR_T_TIME},
-    {H1, ASTR_T_TIME},
-    {H1, ASTR_T_TIME},
-    {H1, ASTR_T_TIME},
-    {H2, ASTR_T_TIME},
-    {H2, ASTR_T_TIME},
-    {H2, ASTR_T_TIME},
-    {H2, ASTR_T_TIME},
-    
-    /*4-3*/
-    {H2, ASTR_T_TIME},
-    {H2, ASTR_T_TIME},
-    {H2, ASTR_T_TIME},
-    {H2, ASTR_T_TIME},
+static const MusicCode_t MC_Astronomia[] =
+    {
+        /*1-1*/
+        {M4, ASTR_T_TIME},
+        {0, ASTR_S_TIME},
+        {M4, ASTR_T_TIME},
+        {0, ASTR_S_TIME},
+        {M4, ASTR_T_TIME},
+        {0, ASTR_S_TIME},
+        {M4, ASTR_T_TIME},
+        {0, ASTR_S_TIME},
+        {M6, ASTR_T_TIME},
+        {0, ASTR_S_TIME},
+        {M6, ASTR_T_TIME},
+        {0, ASTR_S_TIME},
+        {M6, ASTR_T_TIME},
+        {0, ASTR_S_TIME},
+        {M6, ASTR_T_TIME},
+        {0, ASTR_S_TIME},
+
+        /*1-2*/
+        {M5, ASTR_T_TIME},
+        {0, ASTR_S_TIME},
+        {M5, ASTR_T_TIME},
+        {0, ASTR_S_TIME},
+        {M5, ASTR_T_TIME},
+        {0, ASTR_S_TIME},
+        {M5, ASTR_T_TIME},
+        {0, ASTR_S_TIME},
+        {H1, ASTR_T_TIME},
+        {0, ASTR_S_TIME},
+        {H1, ASTR_T_TIME},
+        {0, ASTR_S_TIME},
+        {H1, ASTR_T_TIME},
+        {0, ASTR_S_TIME},
+        {H1, ASTR_T_TIME},
+        {0, ASTR_S_TIME},
+
+        /*1-3*/
+        {H2, ASTR_T_TIME},
+        {0, ASTR_S_TIME},
+        {H2, ASTR_T_TIME},
+        {0, ASTR_S_TIME},
+        {H2, ASTR_T_TIME},
+        {0, ASTR_S_TIME},
+        {H2, ASTR_T_TIME},
+        {0, ASTR_S_TIME},
+        {H2, ASTR_T_TIME},
+        {0, ASTR_S_TIME},
+        {H2, ASTR_T_TIME},
+        {0, ASTR_S_TIME},
+        {H2, ASTR_T_TIME},
+        {0, ASTR_S_TIME},
+        {H2, ASTR_T_TIME},
+        {0, ASTR_S_TIME},
+
+        /*1-4*/
+        {M5, ASTR_T_TIME},
+        {M4, ASTR_T_TIME},
+        {M3, ASTR_T_TIME},
+        {M1, ASTR_T_TIME},
+        {M2, ASTR_T_TIME},
+        {0, ASTR_T_TIME},
+        {M2, ASTR_T_TIME},
+        {M6, ASTR_T_TIME},
+
+        /*2-1*/
+        {M5, ASTR_T_TIME},
+        {0, ASTR_T_TIME},
+        {M4, ASTR_T_TIME},
+        {0, ASTR_T_TIME},
+        {M3, ASTR_T_TIME},
+        {0, ASTR_T_TIME},
+        {M3, ASTR_T_TIME},
+        {M3, ASTR_T_TIME},
+
+        /*2-2*/
+        {M5, ASTR_T_TIME},
+        {0, ASTR_T_TIME},
+        {M4, ASTR_T_TIME},
+        {M3, ASTR_T_TIME},
+        {M2, ASTR_T_TIME},
+        {0, ASTR_T_TIME},
+        {M2, ASTR_T_TIME},
+        {H4, ASTR_T_TIME},
+
+        /*2-3*/
+        {H3, ASTR_T_TIME},
+        {H4, ASTR_T_TIME},
+        {H3, ASTR_T_TIME},
+        {H4, ASTR_T_TIME},
+        {M2, ASTR_T_TIME},
+        {0, ASTR_T_TIME},
+        {M2, ASTR_T_TIME},
+        {H4, ASTR_T_TIME},
+
+        /*2-4*/
+        {H3, ASTR_T_TIME},
+        {H4, ASTR_T_TIME},
+        {H3, ASTR_T_TIME},
+        {H4, ASTR_T_TIME},
+        {M2, ASTR_T_TIME},
+        {0, ASTR_T_TIME},
+        {M2, ASTR_T_TIME},
+        {M6, ASTR_T_TIME},
+
+        /*3-1*/
+        {M5, ASTR_T_TIME},
+        {0, ASTR_T_TIME},
+        {M4, ASTR_T_TIME},
+        {0, ASTR_T_TIME},
+        {M3, ASTR_T_TIME},
+        {0, ASTR_T_TIME},
+        {M3, ASTR_T_TIME},
+        {M3, ASTR_T_TIME},
+
+        /*3-2*/
+        {M5, ASTR_T_TIME},
+        {0, ASTR_T_TIME},
+        {M4, ASTR_T_TIME},
+        {M3, ASTR_T_TIME},
+        {M2, ASTR_T_TIME},
+        {0, ASTR_T_TIME},
+        {M2, ASTR_T_TIME},
+        {H4, ASTR_T_TIME},
+
+        /*3-3*/
+        {H3, ASTR_T_TIME},
+        {H4, ASTR_T_TIME},
+        {H3, ASTR_T_TIME},
+        {H4, ASTR_T_TIME},
+        {M2, ASTR_T_TIME},
+        {0, ASTR_T_TIME},
+        {M2, ASTR_T_TIME},
+        {H4, ASTR_T_TIME},
+
+        /*3-4*/
+        {H3, ASTR_T_TIME},
+        {H4, ASTR_T_TIME},
+        {H3, ASTR_T_TIME},
+        {H4, ASTR_T_TIME},
+        {M4, ASTR_T_TIME},
+        {M4, ASTR_T_TIME},
+        {M4, ASTR_T_TIME},
+        {M4, ASTR_T_TIME},
+
+        /*4-1*/
+        {M6, ASTR_T_TIME},
+        {M6, ASTR_T_TIME},
+        {M6, ASTR_T_TIME},
+        {M6, ASTR_T_TIME},
+        {M5, ASTR_T_TIME},
+        {M5, ASTR_T_TIME},
+        {M5, ASTR_T_TIME},
+        {M5, ASTR_T_TIME},
+
+        /*4-2*/
+        {H1, ASTR_T_TIME},
+        {H1, ASTR_T_TIME},
+        {H1, ASTR_T_TIME},
+        {H1, ASTR_T_TIME},
+        {H2, ASTR_T_TIME},
+        {H2, ASTR_T_TIME},
+        {H2, ASTR_T_TIME},
+        {H2, ASTR_T_TIME},
+
+        /*4-3*/
+        {H2, ASTR_T_TIME},
+        {H2, ASTR_T_TIME},
+        {H2, ASTR_T_TIME},
+        {H2, ASTR_T_TIME},
 };
 
-/*¿ª»úÒô*/
+/*å¼€æœºéŸ³*/
 static const MusicCode_t MC_StartUp[] =
-{
-    {M1, 80, 100},
-    {M6, 80, 100},
-    {M3, 80, 100},
+    {
+        {M1, 80, 100},
+        {M6, 80, 100},
+        {M3, 80, 100},
 };
 
-/*´íÎóÌáÊ¾Òô*/
+/*é”™è¯¯æç¤ºéŸ³*/
 static const MusicCode_t MC_Error[] =
-{
-    {100, 80, 100},
-    {0,   80, 100},
-    {100, 80, 100},
+    {
+        {100, 80, 100},
+        {0, 80, 100},
+        {100, 80, 100},
 };
 
-/*Á¬½Ó³É¹¦Òô*/
+/*è¿žæŽ¥æˆåŠŸéŸ³*/
 static const MusicCode_t MC_Connect[] =
-{
-    {H1, 80, 100},
-    {H2, 80, 100},
-    {H3, 80, 100},
+    {
+        {H1, 80, 100},
+        {H2, 80, 100},
+        {H3, 80, 100},
 };
 
-/*¶Ï¿ªÁ¬½ÓÒô*/
+/*æ–­å¼€è¿žæŽ¥éŸ³*/
 static const MusicCode_t MC_Disconnect[] =
-{
-    {H3, 80, 100},
-    {H2, 80, 100},
-    {H1, 80, 100},
+    {
+        {H3, 80, 100},
+        {H2, 80, 100},
+        {H1, 80, 100},
 };
 
-/*ÐÅºÅ²»ÎÈ¶¨ÌáÊ¾Òô*/
+/*ä¿¡å·ä¸ç¨³å®šæç¤ºéŸ³*/
 static const MusicCode_t MC_UnstableConnect[] =
-{
-    {H1, 80, 100},
-    {0, 80, 100},
-    {H1, 80, 100},
+    {
+        {H1, 80, 100},
+        {0, 80, 100},
+        {H1, 80, 100},
 };
 
-/*³äµçÆô¶¯ÌáÊ¾Òô*/
+/*å……ç”µå¯åŠ¨æç¤ºéŸ³*/
 static const MusicCode_t MC_BattChargeStart[] =
-{
-    {L1, 80, 100},
-    {L3, 80, 100},
+    {
+        {L1, 80, 100},
+        {L3, 80, 100},
 };
 
-/*³äµç¹Ø±ÕÌáÊ¾Òô*/
+/*å……ç”µå…³é—­æç¤ºéŸ³*/
 static const MusicCode_t MC_BattChargeEnd[] =
-{
-    {L3, 80, 100},
-    {L1, 80, 100},
+    {
+        {L3, 80, 100},
+        {L1, 80, 100},
 };
 
-/*Éè±¸²åÈëÌáÊ¾Òô*/
+/*è®¾å¤‡æ’å…¥æç¤ºéŸ³*/
 static const MusicCode_t MC_DeviceInsert[] =
-{
-    /*C4,A3,F3,F4*/
-    {M1, 180, 100},
-    {L6, 80, 100},
-    {L4, 80, 100},
-    {M4, 160, 100},
+    {
+        /*C4,A3,F3,F4*/
+        {M1, 180, 100},
+        {L6, 80, 100},
+        {L4, 80, 100},
+        {M4, 160, 100},
 };
 
-/*Éè±¸°Î³öÌáÊ¾Òô*/
+/*è®¾å¤‡æ‹”å‡ºæç¤ºéŸ³*/
 static const MusicCode_t MC_DevicePullout[] =
-{
-    /*A4,F4,E4*/
-    {L6, 80, 100},
-    {L4, 80, 100},
-    {L3, 80, 100},
+    {
+        /*A4,F4,E4*/
+        {L6, 80, 100},
+        {L4, 80, 100},
+        {L3, 80, 100},
 };
 
-/*ÎÞ²Ù×÷ÌáÊ¾Òô*/
+/*æ— æ“ä½œæç¤ºéŸ³*/
 static const MusicCode_t MC_NoOperationWarning[] = {
     {4000, 40, 100},
     {0, 80, 100},
@@ -310,37 +310,39 @@ static const MusicCode_t MC_NoOperationWarning[] = {
     {4000, 40, 100},
 };
 
-/*ÁÐ±íÊý¾ÝÀàÐÍ¶¨Òå*/
+/*åˆ—è¡¨æ•°æ®ç±»åž‹å®šä¹‰*/
 typedef struct
 {
     const MusicCode_t *mc;
     uint16_t length;
 } MC_List_t;
 
-#define PLAY_MUSIC(mc) player.Play(mc,__Sizeof(mc))
-#define ADD_MUSIC(mc) {mc,__Sizeof(mc)}
+#define PLAY_MUSIC(mc) player.Play(mc, __Sizeof(mc))
+#define ADD_MUSIC(mc)    \
+    {                    \
+        mc, __Sizeof(mc) \
+    }
 
-/*ÌáÊ¾ÒôµØÖ·´¢´æÁÐ±í*/
+/*æç¤ºéŸ³åœ°å€å‚¨å­˜åˆ—è¡¨*/
 static const MC_List_t MC_List[MC_Type::MC_MAX] =
-{
-    ADD_MUSIC(MC_StartUp),
-    ADD_MUSIC(MC_Error),
-    ADD_MUSIC(MC_Connect),
-    ADD_MUSIC(MC_Disconnect),
-    ADD_MUSIC(MC_UnstableConnect),
-    ADD_MUSIC(MC_BattChargeStart),
-    ADD_MUSIC(MC_BattChargeEnd),
-    ADD_MUSIC(MC_DeviceInsert),
-    ADD_MUSIC(MC_DevicePullout),
-    ADD_MUSIC(MC_NoOperationWarning),
-    ADD_MUSIC(MC_Astronomia)
-};
+    {
+        ADD_MUSIC(MC_StartUp),
+        ADD_MUSIC(MC_Error),
+        ADD_MUSIC(MC_Connect),
+        ADD_MUSIC(MC_Disconnect),
+        ADD_MUSIC(MC_UnstableConnect),
+        ADD_MUSIC(MC_BattChargeStart),
+        ADD_MUSIC(MC_BattChargeEnd),
+        ADD_MUSIC(MC_DeviceInsert),
+        ADD_MUSIC(MC_DevicePullout),
+        ADD_MUSIC(MC_NoOperationWarning),
+        ADD_MUSIC(MC_Astronomia)};
 
 /**
-  * @brief  ³õÊ¼»¯·äÃùÆ÷
-  * @param  ÎÞ
-  * @retval ÎÞ
-  */
+ * @brief  åˆå§‹åŒ–èœ‚é¸£å™¨
+ * @param  æ— 
+ * @retval æ— 
+ */
 void Audio_Init()
 {
     DEBUG_FUNC_LOG();
@@ -348,42 +350,42 @@ void Audio_Init()
 }
 
 /**
-  * @brief  ÒôÀÖ²¥·ÅÈÎÎñ
-  * @param  ÎÞ
-  * @retval ÎÞ
-  */
+ * @brief  éŸ³ä¹æ’­æ”¾ä»»åŠ¡
+ * @param  æ— 
+ * @retval æ— 
+ */
 void Audio_Update()
 {
     player.Running(millis());
 }
 
 /**
-  * @brief  ÒôÀÖ²¥·Å
-  * @param  music:ÒôÀÖ±àºÅ
-  * @retval ÎÞ
-  */
+ * @brief  éŸ³ä¹æ’­æ”¾
+ * @param  music:éŸ³ä¹ç¼–å·
+ * @retval æ— 
+ */
 void Audio_PlayMusic(uint8_t music)
 {
-    if(!CTRL.State->Sound) //ÊÇ·ñÊ¹ÄÜ·äÃùÆ÷
+    if (!CTRL.State->Sound) // æ˜¯å¦ä½¿èƒ½èœ‚é¸£å™¨
         return;
 
-    if(music >= MC_Type::MC_MAX) //Êý×é·ÃÎÊÊÇ·ñÔ½½ç
+    if (music >= MC_Type::MC_MAX) // æ•°ç»„è®¿é—®æ˜¯å¦è¶Šç•Œ
         return;
 
-    /*²¥·ÅÆ÷²¥·ÅÒôÀÖ*/
+    /*æ’­æ”¾å™¨æ’­æ”¾éŸ³ä¹*/
     player.Play(MC_List[music].mc, MC_List[music].length);
 }
 
 /**
-  * @brief  Íù·äÃùÆ÷Êä³öÖ¸¶¨ÆµÂÊºÍ³ÖÐøÊ±¼äµÄ·½²¨ÐÅºÅ(·Ç×èÈûÊ½)
-  * @param  freq:ÆµÂÊ(Hz)
-  * @param  time:³ÖÐøÊ±¼ä(ms)
-  * @retval ÎÞ
-  */
+ * @brief  å¾€èœ‚é¸£å™¨è¾“å‡ºæŒ‡å®šé¢‘çŽ‡å’ŒæŒç»­æ—¶é—´çš„æ–¹æ³¢ä¿¡å·(éžé˜»å¡žå¼)
+ * @param  freq:é¢‘çŽ‡(Hz)
+ * @param  time:æŒç»­æ—¶é—´(ms)
+ * @retval æ— 
+ */
 void Audio_Tone(uint32_t freq, uint32_t time)
 {
-    if(!CTRL.State->Sound)
+    if (!CTRL.State->Sound)
         return;
-    
+
     MotorLRA_Tone(freq, time);
 }

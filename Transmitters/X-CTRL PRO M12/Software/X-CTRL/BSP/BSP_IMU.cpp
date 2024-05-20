@@ -4,13 +4,13 @@
 #include "IMU_Private.h"
 #include "Communication/RCX/RCX.h"
 
-#define IMU_RAD(x) (radians(((double)x)*2000.0f/32767.0f))
+#define IMU_RAD(x) (radians(((double)x) * 2000.0f / 32767.0f))
 
-/*ÊµÀý»¯MPU6050¶ÔÏó*/
+/*å®žä¾‹åŒ–MPU6050å¯¹è±¡*/
 static MPU6050 mpu;
 
-/*MPU½Ç¶ÈÊý¾Ý*/
-IMU_Axis_TypeDef    IMU_Axis;
+/*MPUè§’åº¦æ•°æ®*/
+IMU_Axis_TypeDef IMU_Axis;
 IMU_Channel_TypeDef IMU_Channel;
 static bool IsAxisChannelReset = false;
 static float q0 = 1, q1 = 0, q2 = 0, q3 = 0;
@@ -24,28 +24,28 @@ void IMU_NormReset()
 
 void IMU_LimitSetDefault()
 {
-    /*¸©Ñö*/
+    /*ä¿¯ä»°*/
     IMU_Axis.Pitch.Limit = 90;
-    
-    /*ºá¹ö*/
+
+    /*æ¨ªæ»š*/
     IMU_Axis.Roll.Limit = 90;
-    
-    /*º½Ïò*/
+
+    /*èˆªå‘*/
     IMU_Axis.Yaw.Limit = 180;
 }
 
 /**
-  * @brief  ×ËÌ¬½âËã
-  * @param
-  * @retval ÎÞ
-  */
+ * @brief  å§¿æ€è§£ç®—
+ * @param
+ * @retval æ— 
+ */
 static void IMU_NormUpdate(float ax, float ay, float az, float gx, float gy, float gz)
 {
-    /*×ËÌ¬½âËãÊý¾Ý*/
+    /*å§¿æ€è§£ç®—æ•°æ®*/
     const double Kp = 1.0f;
     const double Ki = 0.01f;
-    const double halfT = 0.01f;/*20ms*/
-    
+    const double halfT = 0.01f; /*20ms*/
+
     float norm;
     float vx, vy, vz;
     float ex, ey, ez;
@@ -83,41 +83,41 @@ static void IMU_NormUpdate(float ax, float ay, float az, float gx, float gy, flo
     q3 = q3 / norm;
 
     IMU_Axis.Roll.AngleReal = asin(-2 * q1 * q3 + 2 * q0 * q2) * 57.3f;
-    IMU_Axis.Pitch.AngleReal  = -atan2(2 * q2 * q3 + 2 * q0 * q1, -2 * q1 * q1 - 2 * q2 * q2 + 1) * 57.3f;
-    IMU_Axis.Yaw.AngleReal   = -atan2(2 * (q1 * q2 + q0 * q3), q0 * q0 + q1 * q1 - q2 * q2 - q3 * q3) * 57.3f;
+    IMU_Axis.Pitch.AngleReal = -atan2(2 * q2 * q3 + 2 * q0 * q1, -2 * q1 * q1 - 2 * q2 * q2 + 1) * 57.3f;
+    IMU_Axis.Yaw.AngleReal = -atan2(2 * (q1 * q2 + q0 * q3), q0 * q0 + q1 * q1 - q2 * q2 - q3 * q3) * 57.3f;
 }
 
 static bool IsCalibrateStart = false;
 static uint32_t CalibrateStartTime = 0;
 static uint16_t CalibrateCnt;
-static int32_t gx_sum = 0,gy_sum = 0,gz_sum = 0;
+static int32_t gx_sum = 0, gy_sum = 0, gz_sum = 0;
 
 void IMU_CalibrateStart()
 {
-    if(IsCalibrateStart || !CTRL.State->IMU)
+    if (IsCalibrateStart || !CTRL.State->IMU)
         return;
-    
+
     IsCalibrateStart = true;
     CalibrateStartTime = millis();
-    gx_sum = 0,gy_sum = 0,gz_sum = 0;
+    gx_sum = 0, gy_sum = 0, gz_sum = 0;
     CalibrateCnt = 0;
 }
 
-static void IMU_Calibrate(int16_t* gx,int16_t* gy,int16_t* gz)
+static void IMU_Calibrate(int16_t *gx, int16_t *gy, int16_t *gz)
 {
-    static int16_t gx_cab = 0,gy_cab = 0,gz_cab = 0;
-    if(IsCalibrateStart)
+    static int16_t gx_cab = 0, gy_cab = 0, gz_cab = 0;
+    if (IsCalibrateStart)
     {
         gx_sum += *gx;
         gy_sum += *gy;
         gz_sum += *gz;
         CalibrateCnt++;
-        if(millis() - CalibrateStartTime >= 2000)
+        if (millis() - CalibrateStartTime >= 2000)
         {
             gx_cab = gx_sum / CalibrateCnt;
             gy_cab = gy_sum / CalibrateCnt;
             gz_cab = gz_sum / CalibrateCnt;
-            
+
             IMU_NormReset();
             IsCalibrateStart = false;
         }
@@ -130,7 +130,7 @@ static void IMU_Calibrate(int16_t* gx,int16_t* gy,int16_t* gz)
     }
 }
 
-static void IMU_AngleToChannel(IMU_Angle_TypeDef* angle, IMU_ChBasic_TypeDef* ch)
+static void IMU_AngleToChannel(IMU_Angle_TypeDef *angle, IMU_ChBasic_TypeDef *ch)
 {
     angle->Angle = constrain(angle->AngleReal, -angle->Limit, angle->Limit);
     ch->Data = (ch->Reverse ? -1 : 1) * __Map(angle->Angle, -angle->Limit, angle->Limit, -RCX_CHANNEL_DATA_MAX, RCX_CHANNEL_DATA_MAX);
@@ -141,8 +141,8 @@ static void IMU_AngleToChannel(IMU_Angle_TypeDef* angle, IMU_ChBasic_TypeDef* ch
 static void IMU_ChannelUpdate()
 {
     IMU_AngleToChannel(&IMU_Axis.Pitch, &IMU_Channel.Pitch);
-    IMU_AngleToChannel(&IMU_Axis.Roll,  &IMU_Channel.Roll);
-    IMU_AngleToChannel(&IMU_Axis.Yaw,   &IMU_Channel.Yaw);
+    IMU_AngleToChannel(&IMU_Axis.Roll, &IMU_Channel.Roll);
+    IMU_AngleToChannel(&IMU_Axis.Yaw, &IMU_Channel.Yaw);
 }
 
 static void IMU_AxisChannelReset()
@@ -156,10 +156,10 @@ static void IMU_AxisChannelReset()
 }
 
 /**
-  * @brief  MPU6050³õÊ¼»¯
-  * @param  ÎÞ
-  * @retval ÎÞ
-  */
+ * @brief  MPU6050åˆå§‹åŒ–
+ * @param  æ— 
+ * @retval æ— 
+ */
 void IMU_Init()
 {
     DEBUG_FUNC_LOG();
@@ -167,23 +167,23 @@ void IMU_Init()
 }
 
 /**
-  * @brief  IMU´¦ÀíÈÎÎñ
-  * @param  ÎÞ
-  * @retval ÎÞ
-  */
+ * @brief  IMUå¤„ç†ä»»åŠ¡
+ * @param  æ— 
+ * @retval æ— 
+ */
 void IMU_Update()
 {
-    if(!CTRL.State->IMU)
+    if (!CTRL.State->IMU)
     {
-        if(!IsAxisChannelReset)
+        if (!IsAxisChannelReset)
         {
             IMU_AxisChannelReset();
         }
         return;
     }
     IsAxisChannelReset = false;
-    
-    if(I2C_GetLocked())
+
+    if (I2C_GetLocked())
         return;
 
     int16_t ax, ay, az, gx, gy, gz;

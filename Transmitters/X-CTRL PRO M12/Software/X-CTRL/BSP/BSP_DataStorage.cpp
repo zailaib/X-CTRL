@@ -1,59 +1,61 @@
 #include "BSP.h"
 #include "extEEPROM/extEEPROM.h"
 
-/*Íâ²¿EEPROM*/
+/*å¤–éƒ¨EEPROM*/
 extEEPROM eeprom(kbits_256, 1, 64, 0x50);
 
-/*ÆğÊ¼´¢´æµØÖ·*/
-#define START_ADDR      0
+/*èµ·å§‹å‚¨å­˜åœ°å€*/
+#define START_ADDR 0
 
-/*×î´ó×¢²á±äÁ¿ÊıÁ¿*/
+/*æœ€å¤§æ³¨å†Œå˜é‡æ•°é‡*/
 #define RegDataList_MAX 32
 
-/*¶ÁÈ¡³¬Ê±ÉèÖÃ*/
-#define DataReadTimeOut  5000 /*[ms]*/
+/*è¯»å–è¶…æ—¶è®¾ç½®*/
+#define DataReadTimeOut 5000 /*[ms]*/
 
-/*µ÷ÊÔÈÕÖ¾Êä³ö½Ó¿Ú*/
-#define DS_DEBUG(data)            //Serial.println(data);
-#define DS_DEBUG_FMT(format, ...) //Serial.printf(format, ##__VA_ARGS__)
+/*è°ƒè¯•æ—¥å¿—è¾“å‡ºæ¥å£*/
+#define DS_DEBUG(data)            // Serial.println(data);
+#define DS_DEBUG_FMT(format, ...) // Serial.printf(format, ##__VA_ARGS__)
 
-/*µ¥×Ö½Ú¶ÔÆë*/
+/*å•å­—èŠ‚å¯¹é½*/
 #pragma pack(1)
 /*
----------------------------------------------Êı¾İ½á¹¹--------------------------------------------
-|                     Ö¡Í·                       |                 ÓÃ»§Êı¾İ
-| ÓÃ»§Êı¾İ×Ü³¤ | ÓÃ»§Êı¾İ×Ü¸öÊı | ÓÃ»§Êı¾İĞ£ÑéºÍ | Êı¾İ1´óĞ¡ |  Êı¾İ1  | Êı¾İ2´óĞ¡ |  Êı¾İ2  |...
+---------------------------------------------æ•°æ®ç»“æ„--------------------------------------------
+|                     å¸§å¤´                       |                 ç”¨æˆ·æ•°æ®
+| ç”¨æˆ·æ•°æ®æ€»é•¿ | ç”¨æˆ·æ•°æ®æ€»ä¸ªæ•° | ç”¨æˆ·æ•°æ®æ ¡éªŒå’Œ | æ•°æ®1å¤§å° |  æ•°æ®1  | æ•°æ®2å¤§å° |  æ•°æ®2  |...
 |     2Byte    |     2Byte      |     4Byte      |   2Byte   |  xByte  |   2Byte   |  xByte  |...
 */
 
-/*Ö¡Í·Êı¾İ½á¹¹*/
-typedef struct {
-    uint16_t DataLength;/*ÓÃ»§Êı¾İ×Ü³¤*/
-    uint16_t DataCntSum;/*ÓÃ»§Êı¾İ×Ü¸öÊı*/
-    uint32_t CheckSum;/*ÓÃ»§Êı¾İĞ£ÑéºÍ*/
+/*å¸§å¤´æ•°æ®ç»“æ„*/
+typedef struct
+{
+    uint16_t DataLength; /*ç”¨æˆ·æ•°æ®æ€»é•¿*/
+    uint16_t DataCntSum; /*ç”¨æˆ·æ•°æ®æ€»ä¸ªæ•°*/
+    uint32_t CheckSum;   /*ç”¨æˆ·æ•°æ®æ ¡éªŒå’Œ*/
 } EEPROM_DataHead_t;
 
-/*´¢´æÊı¾İ½á¹¹*/
-typedef struct {
-    uint8_t* pData;/*ÓÃ»§Êı¾İµØÖ·*/
-    uint16_t Size;/*ÓÃ»§Êı¾İ´óĞ¡*/
+/*å‚¨å­˜æ•°æ®ç»“æ„*/
+typedef struct
+{
+    uint8_t *pData; /*ç”¨æˆ·æ•°æ®åœ°å€*/
+    uint16_t Size;  /*ç”¨æˆ·æ•°æ®å¤§å°*/
 } EEPROM_RegList_t;
 #pragma pack()
 
-/*ÓÃ»§Êı¾İÁĞ±í*/
+/*ç”¨æˆ·æ•°æ®åˆ—è¡¨*/
 static EEPROM_RegList_t DataReg_List[RegDataList_MAX] = {0};
 
-/*ÓÃ»§Êı¾İ×¢²áÊÂ¼şµÄ¸öÊı*/
+/*ç”¨æˆ·æ•°æ®æ³¨å†Œäº‹ä»¶çš„ä¸ªæ•°*/
 static uint16_t DataReg_Cnt = 0;
 
-/*µ±Ç°¶ÁĞ´µÄµØÖ·Æ«ÒÆÁ¿*/
+/*å½“å‰è¯»å†™çš„åœ°å€åç§»é‡*/
 static uint16_t DataReg_OffsetAddr = 0;
 
 /**
-  * @brief  EEPROM¶ÁÈ¡½Ó¿Ú
-  * @param  addr:Òª¶ÁÈ¡µÄµØÖ·
-  * @retval Õâ¸öµØÖ·±£´æµÄÊı¾İ
-  */
+ * @brief  EEPROMè¯»å–æ¥å£
+ * @param  addr:è¦è¯»å–çš„åœ°å€
+ * @retval è¿™ä¸ªåœ°å€ä¿å­˜çš„æ•°æ®
+ */
 static uint8_t EEPROM_Read(uint32_t addr)
 {
     DS_DEBUG_FMT(">> R: addr=%d data=0x%x\r\n", addr, eeprom.read(START_ADDR + addr));
@@ -61,26 +63,26 @@ static uint8_t EEPROM_Read(uint32_t addr)
 }
 
 /**
-  * @brief  ´ÓEEPROM¶ÁÈ¡Ò»´®Êı¾İ
-  * @param  addr:Òª¶ÁÈ¡µÄÆğÊ¼µØÖ·
-  * @param  pdata:½ÓÊÕÊı¾İµÄÆğÊ¼µØÖ·
-  * @param  size:½ÓÊÕÊı¾İµÄ¸öÊı
-  * @retval ÎŞ
-  */
-static void EEPROM_Read(uint32_t addr, void* pdata, uint32_t size)
+ * @brief  ä»EEPROMè¯»å–ä¸€ä¸²æ•°æ®
+ * @param  addr:è¦è¯»å–çš„èµ·å§‹åœ°å€
+ * @param  pdata:æ¥æ”¶æ•°æ®çš„èµ·å§‹åœ°å€
+ * @param  size:æ¥æ”¶æ•°æ®çš„ä¸ªæ•°
+ * @retval æ— 
+ */
+static void EEPROM_Read(uint32_t addr, void *pdata, uint32_t size)
 {
-    for(uint32_t i = 0; i < size; i++)
+    for (uint32_t i = 0; i < size; i++)
     {
-        ((uint8_t*)pdata)[i] = EEPROM_Read(addr + i);
+        ((uint8_t *)pdata)[i] = EEPROM_Read(addr + i);
     }
 }
 
 /**
-  * @brief  EEPROMĞ´Êı¾İ½Ó¿Ú
-  * @param  addr:Òª¶ÁÈ¡µÄµØÖ·
-  * @param  data:ÒªĞ´ÈëµÄÊı¾İ
-  * @retval ÎŞ
-  */
+ * @brief  EEPROMå†™æ•°æ®æ¥å£
+ * @param  addr:è¦è¯»å–çš„åœ°å€
+ * @param  data:è¦å†™å…¥çš„æ•°æ®
+ * @retval æ— 
+ */
 static void EEPROM_Write(uint32_t addr, uint8_t data)
 {
     DS_DEBUG_FMT("<< W: addr=%d data=0x%x\r\n", addr, data);
@@ -88,25 +90,25 @@ static void EEPROM_Write(uint32_t addr, uint8_t data)
 }
 
 /**
-  * @brief  ÍùEEPROMĞ´ÈëÒ»´®Êı¾İ
-  * @param  addr:ÒªĞ´ÈëµÄÆğÊ¼µØÖ·
-  * @param  pdata:±»Ğ´Êı¾İµÄÆğÊ¼µØÖ·
-  * @param  size:Ğ´ÈëÊı¾İµÄ¸öÊı
-  * @retval ÎŞ
-  */
-static void EEPROM_Write(uint32_t addr, void* pdata, uint32_t size)
+ * @brief  å¾€EEPROMå†™å…¥ä¸€ä¸²æ•°æ®
+ * @param  addr:è¦å†™å…¥çš„èµ·å§‹åœ°å€
+ * @param  pdata:è¢«å†™æ•°æ®çš„èµ·å§‹åœ°å€
+ * @param  size:å†™å…¥æ•°æ®çš„ä¸ªæ•°
+ * @retval æ— 
+ */
+static void EEPROM_Write(uint32_t addr, void *pdata, uint32_t size)
 {
-    for(uint32_t i = 0; i < size; i++)
+    for (uint32_t i = 0; i < size; i++)
     {
-        EEPROM_Write(addr + i, ((uint8_t*)pdata)[i]);
+        EEPROM_Write(addr + i, ((uint8_t *)pdata)[i]);
     }
 }
 
 /**
-  * @brief  ¶ÁÈ¡ÏÂÒ»¸öµØÖ·µÄÊı¾İ
-  * @param  ÎŞ
-  * @retval ÏÂÒ»¸öµØÖ·´¢´æµÄÊı¾İ
-  */
+ * @brief  è¯»å–ä¸‹ä¸€ä¸ªåœ°å€çš„æ•°æ®
+ * @param  æ— 
+ * @retval ä¸‹ä¸€ä¸ªåœ°å€å‚¨å­˜çš„æ•°æ®
+ */
 static uint8_t EEPROM_ReadNext()
 {
     uint8_t data = EEPROM_Read(DataReg_OffsetAddr);
@@ -115,10 +117,10 @@ static uint8_t EEPROM_ReadNext()
 }
 
 /**
-  * @brief  ÍùÏÂÒ»¸öµØÖ·Ğ´Êı¾İ
-  * @param  data:´ıĞ´ÈëÊı¾İ
-  * @retval ÎŞ
-  */
+ * @brief  å¾€ä¸‹ä¸€ä¸ªåœ°å€å†™æ•°æ®
+ * @param  data:å¾…å†™å…¥æ•°æ®
+ * @retval æ— 
+ */
 static void EEPROM_WriteNext(uint8_t data)
 {
     EEPROM_Write(DataReg_OffsetAddr, data);
@@ -126,10 +128,10 @@ static void EEPROM_WriteNext(uint8_t data)
 }
 
 /**
-  * @brief  EEPROM³õÊ¼»¯
-  * @param  ÎŞ
-  * @retval ´íÎó´úÂë
-  */
+ * @brief  EEPROMåˆå§‹åŒ–
+ * @param  æ— 
+ * @retval é”™è¯¯ä»£ç 
+ */
 uint8_t EEPROM_Init()
 {
     DEBUG_FUNC_LOG();
@@ -137,174 +139,174 @@ uint8_t EEPROM_Init()
 }
 
 /**
-  * @brief  ×¢²áÈÎÒâÀàĞÍ±äÁ¿
-  * @param  *pdata:Ö¸Ïò´ı´¢´æÊı¾İµÄÖ¸Õë
-  * @param  size:Êı¾İ´óĞ¡
-  * @retval true³É¹¦ falseÊ§°Ü
-  */
+ * @brief  æ³¨å†Œä»»æ„ç±»å‹å˜é‡
+ * @param  *pdata:æŒ‡å‘å¾…å‚¨å­˜æ•°æ®çš„æŒ‡é’ˆ
+ * @param  size:æ•°æ®å¤§å°
+ * @retval trueæˆåŠŸ falseå¤±è´¥
+ */
 bool EEPROM_Register(void *pdata, uint16_t size)
 {
-    if(DataReg_Cnt == RegDataList_MAX)
+    if (DataReg_Cnt == RegDataList_MAX)
         return false;
-    
-    DataReg_List[DataReg_Cnt].pData = (uint8_t*)pdata;
+
+    DataReg_List[DataReg_Cnt].pData = (uint8_t *)pdata;
     DataReg_List[DataReg_Cnt].Size = size;
     DataReg_Cnt++;
     return true;
 }
 
 /**
-  * @brief  ±£´æ×¢²áµÄËùÓĞÊı¾İ
-  * @param  ÎŞ
-  * @retval true³É¹¦ falseÊ§°Ü
-  */
+ * @brief  ä¿å­˜æ³¨å†Œçš„æ‰€æœ‰æ•°æ®
+ * @param  æ— 
+ * @retval trueæˆåŠŸ falseå¤±è´¥
+ */
 bool EEPROM_SaveAll()
 {
     DS_DEBUG(__FUNCTION__);
-    
-    /*³õÊ¼»¯Ö¡Í·*/
+
+    /*åˆå§‹åŒ–å¸§å¤´*/
     EEPROM_DataHead_t head;
     memset(&head, 0, sizeof(head));
-    
-    /*¹ØÖĞ¶Ï£¬·ÀÖ¹Êı¾İ´Û¸Ä*/
+
+    /*å…³ä¸­æ–­ï¼Œé˜²æ­¢æ•°æ®ç¯¡æ”¹*/
     noInterrupts();
-    
-    /*Éú³ÉÖ¡Í·ĞÅÏ¢*/
-    /*ÓÃ»§×¢²áÊı¾İµÄ×Ü¸öÊı*/
+
+    /*ç”Ÿæˆå¸§å¤´ä¿¡æ¯*/
+    /*ç”¨æˆ·æ³¨å†Œæ•°æ®çš„æ€»ä¸ªæ•°*/
     head.DataCntSum = DataReg_Cnt;
 
-    /*±éÀú×¢²áÁĞ±í,Éú³ÉĞ£ÑéĞÅÏ¢*/
-    for(uint32_t cnt = 0; cnt < DataReg_Cnt; cnt++)
+    /*éå†æ³¨å†Œåˆ—è¡¨,ç”Ÿæˆæ ¡éªŒä¿¡æ¯*/
+    for (uint32_t cnt = 0; cnt < DataReg_Cnt; cnt++)
     {
-        /*ÓÃ»§Êı¾İ×Ü³¤*/
+        /*ç”¨æˆ·æ•°æ®æ€»é•¿*/
         uint16_t length = (sizeof(DataReg_List[cnt].Size) + DataReg_List[cnt].Size);
-        
-        /*ÓÃ»§Êı¾İĞ£Ñé×ÜºÍ*/
+
+        /*ç”¨æˆ·æ•°æ®æ ¡éªŒæ€»å’Œ*/
         uint32_t checksum = 0;
         uint16_t size = DataReg_List[cnt].Size;
         checksum += highByte(size);
         checksum += lowByte(size);
-        for(uint32_t offset = 0; offset < size; offset++)
+        for (uint32_t offset = 0; offset < size; offset++)
         {
             checksum += (DataReg_List[cnt].pData)[offset];
         }
-        
+
         DS_DEBUG_FMT("CNT %d : size = %d, length = %d, checksum = %d\r\n", cnt, size, length, checksum);
-        
+
         head.DataLength += length;
         head.CheckSum += checksum;
     }
 
-    /*Ğ´ÈëÖ¡Í·ĞÅÏ¢*/
+    /*å†™å…¥å¸§å¤´ä¿¡æ¯*/
     EEPROM_Write(0, &head, sizeof(head));
     DS_DEBUG("Write head");
     DS_DEBUG_FMT(".DataLength   = %d\r\n", head.DataLength);
     DS_DEBUG_FMT(".DataCntSum   = %d\r\n", head.DataCntSum);
     DS_DEBUG_FMT(".DataCheckSum = %d\r\n", head.CheckSum);
-    
-    /*ÒÆµ½Ö¡Í·Ö®ºó,¾ÍÊÇÓÃ»§Êı¾İÇø*/
+
+    /*ç§»åˆ°å¸§å¤´ä¹‹å,å°±æ˜¯ç”¨æˆ·æ•°æ®åŒº*/
     DataReg_OffsetAddr = sizeof(head);
 
-    /*±éÀú×¢²áÁĞ±í£¬Ğ´ÈëÓÃ»§Êı¾İ*/
-    for(uint32_t i = 0; i < DataReg_Cnt; i++)
+    /*éå†æ³¨å†Œåˆ—è¡¨ï¼Œå†™å…¥ç”¨æˆ·æ•°æ®*/
+    for (uint32_t i = 0; i < DataReg_Cnt; i++)
     {
         uint16_t size = DataReg_List[i].Size;
         EEPROM_WriteNext(highByte(size));
         EEPROM_WriteNext(lowByte(size));
-        for(uint32_t offset = 0; offset < size; offset++)
+        for (uint32_t offset = 0; offset < size; offset++)
         {
             EEPROM_WriteNext((DataReg_List[i].pData)[offset]);
         }
     }
-    
-    /*ÅĞ¶ÏÊÇ·ñĞ´Èë³É¹¦*/
-    bool retval =  EEPROM_ReadAll();
-    
-    /*ÖØĞÂÆôÓÃÖĞ¶Ï*/
+
+    /*åˆ¤æ–­æ˜¯å¦å†™å…¥æˆåŠŸ*/
+    bool retval = EEPROM_ReadAll();
+
+    /*é‡æ–°å¯ç”¨ä¸­æ–­*/
     interrupts();
-    
+
     return retval;
 }
 
 /**
-  * @brief  ¶ÁÈ¡×¢²áµÄËùÓĞÊı¾İ
-  * @param  ÎŞ
-  * @retval true³É¹¦ falseÊ§°Ü
-  */
+ * @brief  è¯»å–æ³¨å†Œçš„æ‰€æœ‰æ•°æ®
+ * @param  æ— 
+ * @retval trueæˆåŠŸ falseå¤±è´¥
+ */
 bool EEPROM_ReadAll()
 {
     DS_DEBUG(__FUNCTION__);
-    
-    /*³õÊ¼»¯Ö¡Í·*/
+
+    /*åˆå§‹åŒ–å¸§å¤´*/
     EEPROM_DataHead_t head;
     memset(&head, 0, sizeof(head));
-    
-    /*»ñÈ¡Ö¡Í·ĞÅÏ¢*/
+
+    /*è·å–å¸§å¤´ä¿¡æ¯*/
     EEPROM_Read(0, &head, sizeof(head));
     DS_DEBUG("Read head");
     DS_DEBUG_FMT(".DataLength   = %d\r\n", head.DataLength);
     DS_DEBUG_FMT(".DataCntSum.  = %d\r\n", head.DataCntSum);
     DS_DEBUG_FMT(".DataCheckSum = %d\r\n", head.CheckSum);
 
-    /*³õÊ¼»¯ÓÃ»§Êı¾İĞ£ÑéºÍ*/
+    /*åˆå§‹åŒ–ç”¨æˆ·æ•°æ®æ ¡éªŒå’Œ*/
     uint32_t UserDataCheckSum = 0;
     uint32_t StartReadTime = millis();
-    
-    /*ÒÆµ½ÓÃ»§Êı¾İÇø*/
+
+    /*ç§»åˆ°ç”¨æˆ·æ•°æ®åŒº*/
     DataReg_OffsetAddr = sizeof(head);
 
-    /*¼ÆËãĞ£ÑéºÍ*/
-    for(uint16_t i = 0; i < head.DataLength; i++)
+    /*è®¡ç®—æ ¡éªŒå’Œ*/
+    for (uint16_t i = 0; i < head.DataLength; i++)
     {
-        /*¶ÁÈ¡ÊÇ·ñ³¬Ê±*/
-        if(millis() - StartReadTime > DataReadTimeOut)
+        /*è¯»å–æ˜¯å¦è¶…æ—¶*/
+        if (millis() - StartReadTime > DataReadTimeOut)
         {
             DS_DEBUG("ERROR! data read timeout");
             return false;
         }
-        
+
         UserDataCheckSum += EEPROM_ReadNext();
     }
 
-    /*Ğ£ÑéÓÃ»§Êı¾İÊÇ·ñÓë×¢²áÁĞ±íÆ¥Åä*/
-    /*¼ì²éĞ£ÑéºÍ*/
-    if(UserDataCheckSum != head.CheckSum)
+    /*æ ¡éªŒç”¨æˆ·æ•°æ®æ˜¯å¦ä¸æ³¨å†Œåˆ—è¡¨åŒ¹é…*/
+    /*æ£€æŸ¥æ ¡éªŒå’Œ*/
+    if (UserDataCheckSum != head.CheckSum)
     {
         DS_DEBUG_FMT("ERROR! UserDataCheckSum = %d, not PASS\r\n", UserDataCheckSum);
         return false;
     }
-    
-    /*¼ì²é×¢²á¸öÊı*/
-    if(head.DataCntSum != DataReg_Cnt)
+
+    /*æ£€æŸ¥æ³¨å†Œä¸ªæ•°*/
+    if (head.DataCntSum != DataReg_Cnt)
     {
         DS_DEBUG_FMT("ERROR! DataCntSum = %d, not PASS\r\n", head.DataCntSum);
         return false;
     }
-    
-    /*ÒÆµ½ÓÃ»§Êı¾İÇø*/
+
+    /*ç§»åˆ°ç”¨æˆ·æ•°æ®åŒº*/
     DataReg_OffsetAddr = sizeof(head);
-    
-    /*±éÀú×¢²áÁĞ±í*/
-    for(uint32_t i = 0; i < head.DataCntSum; i++)
+
+    /*éå†æ³¨å†Œåˆ—è¡¨*/
+    for (uint32_t i = 0; i < head.DataCntSum; i++)
     {
         uint8_t high = EEPROM_ReadNext();
         uint8_t low = EEPROM_ReadNext();
 
         uint16_t UserSize = high << 8 | low;
 
-        /*/Ğ£ÑéÊÇ·ñÓëÓÃ»§×¢²áÁĞ±íÆ¥Åä*/
-        if(UserSize != DataReg_List[i].Size)
+        /*/æ ¡éªŒæ˜¯å¦ä¸ç”¨æˆ·æ³¨å†Œåˆ—è¡¨åŒ¹é…*/
+        if (UserSize != DataReg_List[i].Size)
         {
             DS_DEBUG_FMT("ERROR! UserSize = %d, not PASS\r\n", UserSize);
             return false;
         }
 
-        /*½«¶ÁÈ¡µÄÊı¾İĞ´Èë×¢²áÁĞ±íÖĞpDataÖ¸ÕëÖ¸ÏòµÄÊı¾İ*/
-        for(uint32_t offset = 0; offset < UserSize; offset++)
+        /*å°†è¯»å–çš„æ•°æ®å†™å…¥æ³¨å†Œåˆ—è¡¨ä¸­pDataæŒ‡é’ˆæŒ‡å‘çš„æ•°æ®*/
+        for (uint32_t offset = 0; offset < UserSize; offset++)
             (DataReg_List[i].pData)[offset] = EEPROM_ReadNext();
     }
-    
-    /*¶ÁÈ¡³É¹¦*/
+
+    /*è¯»å–æˆåŠŸ*/
     DS_DEBUG("Read and check success");
     return true;
 }
