@@ -6,7 +6,7 @@
 
 #pragma pack(1)
 
-/*Ğ£×¼*/
+/*æ ¡å‡†*/
 typedef struct
 {
     int16_t Val;
@@ -23,14 +23,14 @@ typedef struct
     } Curve;
 } XC_Channel_TypeDef;
 
-/*Ò¡¸Ë*/
+/*æ‘‡æ†*/
 typedef struct
 {
     XC_Channel_TypeDef X;
     XC_Channel_TypeDef Y;
 } XC_Joystick_TypeDef;
 
-/*¹¦ÄÜÊ¹ÄÜ*/
+/*åŠŸèƒ½ä½¿èƒ½*/
 typedef struct
 {
     bool Passback;
@@ -45,31 +45,31 @@ typedef struct
     bool IMU;
     bool Bluetooth;
     bool CurrentDisp;
-}XC_State_TypeDef;
+} XC_State_TypeDef;
 
-/*ÉäÆµÅäÖÃ*/
+/*å°„é¢‘é…ç½®*/
 typedef struct
 {
     uint8_t Speed;
     uint8_t Freq;
     uint8_t Addr[5];
-}XC_RF_Config_TypeDef;
+} XC_RF_Config_TypeDef;
 
-/*Í¨µÀÅäÖÃ*/
+/*é€šé“é…ç½®*/
 typedef struct
 {
     bool Reverse[RCX_CHANNEL_NUM];
     uint8_t AttachMap[RCX_CHANNEL_NUM];
-}XC_CH_Config_TypeDef;
+} XC_CH_Config_TypeDef;
 
-/*Ò£¿ØÆ÷×´Ì¬*/
+/*é¥æ§å™¨çŠ¶æ€*/
 typedef struct
 {
-    /*Ò¡¸Ë*/
+    /*æ‘‡æ†*/
     XC_Joystick_TypeDef JS_L;
     XC_Joystick_TypeDef JS_R;
 
-    /*°´¼ü*/
+    /*æŒ‰é”®*/
     union
     {
         struct
@@ -86,21 +86,21 @@ typedef struct
         uint8_t Value;
     } Key;
 
-    /*Èı¶ÎÊ½¿ª¹Ø*/
+    /*ä¸‰æ®µå¼å¼€å…³*/
     int16_t Switch[4];
 
-    /*Í¨µÀÅäÖÃĞÅÏ¢*/
-    XC_CH_Config_TypeDef* CH_Config;
+    /*é€šé“é…ç½®ä¿¡æ¯*/
+    XC_CH_Config_TypeDef *CH_Config;
 
-    /*¹¦ÄÜ¿ª¹Ø*/
-    XC_State_TypeDef* State;
-    
-    /*ÉäÆµÅäÖÃ*/
-    XC_RF_Config_TypeDef* RF_Config;
-    
+    /*åŠŸèƒ½å¼€å…³*/
+    XC_State_TypeDef *State;
+
+    /*å°„é¢‘é…ç½®*/
+    XC_RF_Config_TypeDef *RF_Config;
+
     uint8_t ModelIndex;
 
-    /*µç³ØĞÅÏ¢*/
+    /*ç”µæ± ä¿¡æ¯*/
     struct
     {
         float Usage;

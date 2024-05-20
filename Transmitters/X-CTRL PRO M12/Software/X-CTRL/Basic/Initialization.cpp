@@ -4,43 +4,43 @@
 #include "BSP/IMU_Private.h"
 #include "Model/XC_Model.h"
 
-/*Ò£¿ØÆ÷½á¹¹Ìå*/
+/*é¥æ§å™¨ç»“æ„ä½“*/
 X_CTRL_TypeDef CTRL;
 
 /**
-  * @brief  ±äÁ¿³õÊ¼»¯
-  * @param  ÎŞ
-  * @retval true³É¹¦ falseÊ§°Ü
-  */
+ * @brief  å˜é‡åˆå§‹åŒ–
+ * @param  æ— 
+ * @retval trueæˆåŠŸ falseå¤±è´¥
+ */
 bool Value_Init()
 {
     DEBUG_FUNC_LOG();
     uint8_t eep_ret = EEPROM_Init();
-    
+
     EEPROM_REG_VALUE(CTRL.JS_L);
     EEPROM_REG_VALUE(CTRL.JS_R);
     EEPROM_REG_VALUE(CTRL.ModelIndex);
     EEPROM_REG_VALUE(XC_Model);
-    
+
     EEPROM_REG_VALUE(IMU_Axis.Pitch.Limit);
     EEPROM_REG_VALUE(IMU_Axis.Roll.Limit);
     EEPROM_REG_VALUE(IMU_Axis.Yaw.Limit);
 
-    if(eep_ret != 0)
+    if (eep_ret != 0)
     {
         Serial.printf("EEPROM error! (0x%x)\r\n", eep_ret);
         return false;
     }
 
-    if(!EEPROM_ReadAll())
+    if (!EEPROM_ReadAll())
     {
         X_CTRL_SetDefault();
         Serial.println("EEPROM data error! set data to default value");
         return false;
     }
-    
+
     Serial.println("EEPROM init success");
-    
+
     return true;
 }
 
@@ -60,15 +60,15 @@ void X_CTRL_SetDefault()
 }
 
 /**
-  * @brief  Ò£¿ØÆ÷³õÊ¼»¯
-  * @param  ÎŞ
-  * @retval ÎŞ
-  */
+ * @brief  é¥æ§å™¨åˆå§‹åŒ–
+ * @param  æ— 
+ * @retval æ— 
+ */
 void X_CTRL_Init()
 {
     Serial.begin(115200);
     DEBUG_FUNC_LOG();
-    
+
     I2C_Scan(false);
     Power_Init();
     Value_Init();
@@ -83,8 +83,8 @@ void X_CTRL_Init()
     MotorERM_Init();
 
     Com_ChannelInit();
-    
-    if(Com_Init())
+
+    if (Com_Init())
     {
         Serial.println("Communication init success");
         Audio_PlayMusic(MC_Type::MC_StartUp);
