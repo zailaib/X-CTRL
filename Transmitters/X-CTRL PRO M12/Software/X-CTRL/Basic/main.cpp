@@ -25,7 +25,7 @@ static void setup()
     mtmMain.Register(IMU_Update, 20);
     mtmMain.Register(Audio_Update, 20);
 
-    // 遥控器的震动马达(**不是**小车🚗的马达哈)
+    // 遥控器上面安装的震动马达
     mtmMain.Register(MotorLRA_Update, 20);
 
     // 定时器中断回调函数

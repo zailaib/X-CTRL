@@ -2,45 +2,45 @@
 #include "GUI/DisplayPrivate.h"
 #include "Communication/ComPrivate.h"
 
-/*±»Ñ¡ÖĞµÄÑ¡Ïî*/
+/*è¢«é€‰ä¸­çš„é€‰é¡¹*/
 static int16_t ItemSelect = 0;
 
-/*¿ÉÑ¡Ñ¡Ïî×î´ó¸öÊı*/
+/*å¯é€‰é€‰é¡¹æœ€å¤§ä¸ªæ•°*/
 static uint8_t ItemSelect_MAX = 0;
 
 /**
-  * @brief  Ò³Ãæ³õÊ¼»¯ÊÂ¼ş
-  * @param  ÎŞ
-  * @retval ÎŞ
-  */
+ * @brief  é¡µé¢åˆå§‹åŒ–äº‹ä»¶
+ * @param  æ— 
+ * @retval æ— 
+ */
 static void Setup()
 {
-    Com_SetEnable(false);//Ò£¿Ø¹Ø±Õ
+    Com_SetEnable(false); // é¥æ§å…³é—­
     ItemSelect_MAX = 0;
     ItemSelect = 0;
-    
-    /*ÅäÖÃ»ù±¾ĞÅÏ¢*/
-    RCX::Handshake::Pack_t* master = RCX::Handshake::GetMaster();
+
+    /*é…ç½®åŸºæœ¬ä¿¡æ¯*/
+    RCX::Handshake::Pack_t *master = RCX::Handshake::GetMaster();
     master->EnableFunction.Passback = CTRL.State->Passback;
     master->EnableFunction.FHSS = CTRL.State->FHSS;
     master->Speed = nrf.GetSpeed();
 
-    /*ÎÕÊÖ³õÊ¼»¯*/
+    /*æ¡æ‰‹åˆå§‹åŒ–*/
     RCX::Handshake::Init(&nrfTRM, &nrfFHSS, XC_NAME);
-    
-    /*Ö÷»ú×¼±¸ÎÕÊÖ*/
+
+    /*ä¸»æœºå‡†å¤‡æ¡æ‰‹*/
     RCX::Handshake::Process(RCX::Handshake::State_Prepare);
-    
+
     Serial.println("Searching...");
-    /*³¬Ê±ÉèÖÃ*/
+    /*è¶…æ—¶è®¾ç½®*/
     uint32_t time = millis();
     uint8_t ItemSelect_MAX_Last = 0;
-    while(millis() - time < 5000)
+    while (millis() - time < 5000)
     {
-        /*»ñÈ¡´Ó»úÁĞ±íÊıÁ¿*/
+        /*è·å–ä»æœºåˆ—è¡¨æ•°é‡*/
         ItemSelect_MAX = RCX::Handshake::Process(RCX::Handshake::State_Search);
 
-        if(ItemSelect_MAX > ItemSelect_MAX_Last)
+        if (ItemSelect_MAX > ItemSelect_MAX_Last)
         {
             Serial.printf("Find %d Slave...\r\n", ItemSelect_MAX);
             ItemSelect_MAX_Last = ItemSelect_MAX;
@@ -50,46 +50,43 @@ static void Setup()
         PageDelay(1);
     }
 
-    /*ÏÔÊ¾ËÑË÷½á¹û*/
+    /*æ˜¾ç¤ºæœç´¢ç»“æœ*/
     Serial.println(ItemSelect_MAX > 0 ? "Search Done!" : "Not Found!");
     PageDelay(200);
 }
 
 /**
-  * @brief  Ò³ÃæÑ­»·ÊÂ¼ş
-  * @param  ÎŞ
-  * @retval ÎŞ
-  */
+ * @brief  é¡µé¢å¾ªç¯äº‹ä»¶
+ * @param  æ— 
+ * @retval æ— 
+ */
 static void Loop()
 {
     page.PagePush(PAGE_CtrlPage);
 }
 
 /**
-  * @brief  Ò³ÃæÍË³öÊÂ¼ş
-  * @param  ÎŞ
-  * @retval ÎŞ
-  */
+ * @brief  é¡µé¢é€€å‡ºäº‹ä»¶
+ * @param  æ— 
+ * @retval æ— 
+ */
 static void Exit()
 {
-    /*³¢ÊÔÁ¬½Ó´Ó»ú*/
+    /*å°è¯•è¿æ¥ä»æœº*/
     Serial.println("Connecting...");
 
-    /*³¬Ê±ÉèÖÃ*/
+    /*è¶…æ—¶è®¾ç½®*/
     uint32_t timeout = millis();
     bool IsTimeout = false;
-    /*µÈ´ı´Ó»úÏìÓ¦ÎÕÊÖĞÅºÅ*/
-    while(
+    /*ç­‰å¾…ä»æœºå“åº”æ¡æ‰‹ä¿¡å·*/
+    while (
         RCX::Handshake::Process(
-            RCX::Handshake::State_ReqConnect, 
-            ItemSelect, 
-            RCX::Handshake::CMD_AttachConnect
-        ) 
-        != RCX::Handshake::CMD_AgreeConnect
-    )
+            RCX::Handshake::State_ReqConnect,
+            ItemSelect,
+            RCX::Handshake::CMD_AttachConnect) != RCX::Handshake::CMD_AgreeConnect)
     {
-        /*³¬Ê±*/
-        if(millis() - timeout > 1000)
+        /*è¶…æ—¶*/
+        if (millis() - timeout > 1000)
         {
             Serial.println("Timeout");
             IsTimeout = true;
@@ -98,11 +95,11 @@ static void Exit()
         PageDelay(1);
     }
 
-    /*ÎÕÊÖÊÕÎ²ÉèÖÃ£¬Ìø×ªÖÁÔ¼¶¨ºÃµÄÎÕÊÖÆµÂÊÒÔ¼°µØÖ·*/
+    /*æ¡æ‰‹æ”¶å°¾è®¾ç½®ï¼Œè·³è½¬è‡³çº¦å®šå¥½çš„æ¡æ‰‹é¢‘ç‡ä»¥åŠåœ°å€*/
     RCX::Handshake::Process(RCX::Handshake::State_Connected);
 
-    /*Èç¹ûÎ´³¬Ê±±íÊ¾ÎÕÊÖ³É¹¦*/
-    if(!IsTimeout)
+    /*å¦‚æœæœªè¶…æ—¶è¡¨ç¤ºæ¡æ‰‹æˆåŠŸ*/
+    if (!IsTimeout)
     {
         Serial.println("Connect successfully");
         Audio_PlayMusic(MC_Type::MC_Connect);
@@ -116,24 +113,23 @@ static void Exit()
 }
 
 /**
-  * @brief  Ò³ÃæÊÂ¼ş
-  * @param  btn:·¢³öÊÂ¼şµÄ°´¼ü
-  * @param  event:ÊÂ¼ş±àºÅ
-  * @retval ÎŞ
-  */
-static void Event(void* btn, int event)
+ * @brief  é¡µé¢äº‹ä»¶
+ * @param  btn:å‘å‡ºäº‹ä»¶çš„æŒ‰é”®
+ * @param  event:äº‹ä»¶ç¼–å·
+ * @retval æ— 
+ */
+static void Event(void *btn, int event)
 {
-    if(event == ButtonEvent::EVENT_ButtonPress)
+    if (event == ButtonEvent::EVENT_ButtonPress)
     {
-
     }
 }
 
 /**
-  * @brief  Ò³Ãæ×¢²á
-  * @param  pageID:Îª´ËÒ³Ãæ·ÖÅäµÄIDºÅ
-  * @retval ÎŞ
-  */
+ * @brief  é¡µé¢æ³¨å†Œ
+ * @param  pageID:ä¸ºæ­¤é¡µé¢åˆ†é…çš„IDå·
+ * @retval æ— 
+ */
 void PageRegister_HandshakeAuto(uint8_t pageID)
 {
     page.PageRegister(pageID, Setup, Loop, Exit, Event);
