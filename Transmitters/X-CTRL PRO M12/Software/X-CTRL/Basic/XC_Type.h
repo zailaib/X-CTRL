@@ -34,8 +34,13 @@ typedef struct
 typedef struct
 {
     bool Passback;
+    // Passback：回传。在通信系统中，"Passback"通常用于指示将数据回传给发送方。
+    // 它可以表示在当前系统或通信协议中，数据需要经过一系列传输步骤，并且回传给发送方进行处理或确认。
     bool Handshake;
     bool FHSS;
+    // FHSS（Frequency Hopping Spread Spectrum）：频率跳变扩频技术。
+    // 在无线通信中，FHSS是一种通过在不同频率之间快速切换来传输数据的技术。
+    // 如果在代码中使用了"FHSS"标志位，可能表示当前系统正在使用或启用了FHSS技术。
     bool IdleWarn;
     bool SignWarn;
     bool JostickFilter;

@@ -1,10 +1,10 @@
 #include "NRF.h"
 
 /**
-  * @brief  ÌøÆµ´¦Àí
-  * @param  ÎÞ
-  * @retval ÎÞ
-  */
+ * @brief  è·³é¢‘å¤„ç†
+ * @param  æ— 
+ * @retval æ— 
+ */
 void NRF_FHSS::FH_Process()
 {
     FH_List_Index++;
@@ -13,45 +13,45 @@ void NRF_FHSS::FH_Process()
 }
 
 /**
-  * @brief  ÌøÆµ+µ¥¹¤·¢ËÍ
-  * @param  txbuff:·¢ËÍÊý¾Ý°üµØÖ·
-  * @retval ÎÞ
-  */
-void NRF_FHSS::TxProcess(void* txbuff)
+ * @brief  è·³é¢‘+å•å·¥å‘é€
+ * @param  txbuff:å‘é€æ•°æ®åŒ…åœ°å€
+ * @retval æ— 
+ */
+void NRF_FHSS::TxProcess(void *txbuff)
 {
-    /*¼ì²éÉÏÒ»´ÎµÄ·¢ËÍÇé¿ö*/
+    /*æ£€æŸ¥ä¸Šä¸€æ¬¡çš„å‘é€æƒ…å†µ*/
     Basic->TranCheck();
-    /*·¢Éä¶ËÌøÆµ*/
+    /*å‘å°„ç«¯è·³é¢‘*/
     FH_Process();
-    /*ÔÙ·¢ËÍ*/
+    /*å†å‘é€*/
     Basic->Tran(txbuff);
-    /*²»¹Ü½ÓÊÕ¶Ë×´Ì¬*/
+    /*ä¸ç®¡æŽ¥æ”¶ç«¯çŠ¶æ€*/
 }
 
 /**
-  * @brief  ÌøÆµ+µ¥¹¤½ÓÊÕ
-  * @param  rxbuff:½ÓÊÕÊý¾Ý°üµØÖ·
-  * @retval ÎÞ
-  */
-void NRF_FHSS::RxProcess(void* rxbuff)
+ * @brief  è·³é¢‘+å•å·¥æŽ¥æ”¶
+ * @param  rxbuff:æŽ¥æ”¶æ•°æ®åŒ…åœ°å€
+ * @retval æ— 
+ */
+void NRF_FHSS::RxProcess(void *rxbuff)
 {
-    /*Èç¹ûÕý³£½ÓÊÕ£¬ÔòÏÂÒ»´ÎÕý³£ÌøÆµ*/
-    if(Basic->Recv(rxbuff))
+    /*å¦‚æžœæ­£å¸¸æŽ¥æ”¶ï¼Œåˆ™ä¸‹ä¸€æ¬¡æ­£å¸¸è·³é¢‘*/
+    if (Basic->Recv(rxbuff))
     {
         LastRxTime = millis();
         FH_Enable = true;
     }
 
-    /*ÊÇ·ñÆôÓÃÕý³£ÌøÆµ*/
-    if(FH_Enable)
+    /*æ˜¯å¦å¯ç”¨æ­£å¸¸è·³é¢‘*/
+    if (FH_Enable)
     {
         FH_Process();
     }
 
-    /*ÔÚ¶ªÊ§ÐÅºÅ³¬Ê±ºó£¬½ÓÊÕ¶Ë¹Ø±ÕÕý³£ÌøÆµ*/
-    /*ÂýÌøµÈ´ýÖØÐÂÍ¬²½·¢Éä¶Ë£¬ÂýÌøÖÜÆÚ´óÓÚ·¢¶Ë±éÀúÌøÆµ±íµÄÖÜÆÚ*/
-    /*Ò»µ©½ÓÊÕ³É¹¦£¬Á¢¼´Æô¶¯Õý³£ÌøÆµ*/
-    if(millis() - LastRxTime >= InterruptTime * (FH_List_Length + 5))
+    /*åœ¨ä¸¢å¤±ä¿¡å·è¶…æ—¶åŽï¼ŒæŽ¥æ”¶ç«¯å…³é—­æ­£å¸¸è·³é¢‘*/
+    /*æ…¢è·³ç­‰å¾…é‡æ–°åŒæ­¥å‘å°„ç«¯ï¼Œæ…¢è·³å‘¨æœŸå¤§äºŽå‘ç«¯éåŽ†è·³é¢‘è¡¨çš„å‘¨æœŸ*/
+    /*ä¸€æ—¦æŽ¥æ”¶æˆåŠŸï¼Œç«‹å³å¯åŠ¨æ­£å¸¸è·³é¢‘*/
+    if (millis() - LastRxTime >= InterruptTime * (FH_List_Length + 5))
     {
         LastRxTime = millis();
         FH_Process();
@@ -60,31 +60,31 @@ void NRF_FHSS::RxProcess(void* rxbuff)
 }
 
 /**
-  * @brief  ÌøÆµ+°ëË«¹¤(·¢ËÍ¶Ë)
-  * @param  txbuff:·¢ËÍÊý¾Ý°üµØÖ·
-  * @param  rxbuff:½ÓÊÕÊý¾Ý°üµØÖ·(Èç¹ûÏëµ¥¹¤¾Í´«ÈëNULL)
-  * @retval ÎÞ
-  */
-void NRF_FHSS::TxProcess(void* txbuff, void* rxbuff)
+ * @brief  è·³é¢‘+åŠåŒå·¥(å‘é€ç«¯)
+ * @param  txbuff:å‘é€æ•°æ®åŒ…åœ°å€
+ * @param  rxbuff:æŽ¥æ”¶æ•°æ®åŒ…åœ°å€(å¦‚æžœæƒ³å•å·¥å°±ä¼ å…¥NULL)
+ * @retval æ— 
+ */
+void NRF_FHSS::TxProcess(void *txbuff, void *rxbuff)
 {
-    /*ÊÇ·ñÊ¹ÓÃµ¥¹¤*/
-    if(rxbuff == NULL)
+    /*æ˜¯å¦ä½¿ç”¨å•å·¥*/
+    if (rxbuff == NULL)
     {
         TxProcess(txbuff);
         return;
     }
-    
+
     uint8_t status = Basic->GetStatus();
-    if(Basic->RF_State == Basic->State_RX)
+    if (Basic->RF_State == Basic->State_RX)
     {
         Basic->Recv(rxbuff);
         FH_Process();
         Basic->TX_Mode();
         Basic->Tran(txbuff);
     }
-    else if(Basic->RF_State == Basic->State_TX)
+    else if (Basic->RF_State == Basic->State_TX)
     {
-        if(status & Basic->TX_DS)
+        if (status & Basic->TX_DS)
         {
             Basic->RF_TranSuccessCnt++;
         }
@@ -93,36 +93,36 @@ void NRF_FHSS::TxProcess(void* txbuff, void* rxbuff)
 }
 
 /**
-  * @brief  ÌøÆµ+°ëË«¹¤(½ÓÊÕ¶Ë)
-  * @param  rxbuff:½ÓÊÕÊý¾Ý°üµØÖ·
-  * @param  txbuff:·¢ËÍÊý¾Ý°üµØÖ·(Èç¹ûÏëµ¥¹¤¾Í´«ÈëNULL)
-  * @retval ÎÞ
-  */
-void NRF_FHSS::RxProcess(void* rxbuff, void* txbuff)
+ * @brief  è·³é¢‘+åŠåŒå·¥(æŽ¥æ”¶ç«¯)
+ * @param  rxbuff:æŽ¥æ”¶æ•°æ®åŒ…åœ°å€
+ * @param  txbuff:å‘é€æ•°æ®åŒ…åœ°å€(å¦‚æžœæƒ³å•å·¥å°±ä¼ å…¥NULL)
+ * @retval æ— 
+ */
+void NRF_FHSS::RxProcess(void *rxbuff, void *txbuff)
 {
-    if(txbuff == NULL)
+    if (txbuff == NULL)
     {
         RxProcess(rxbuff);
         return;
     }
-    
+
     uint8_t status = Basic->GetStatus();
-    if(Basic->RF_State == Basic->State_TX)
+    if (Basic->RF_State == Basic->State_TX)
     {
-        if(status & Basic->TX_DS)
+        if (status & Basic->TX_DS)
         {
             Basic->RF_TranSuccessCnt++;
         }
-        
-        if(FH_Enable)
+
+        if (FH_Enable)
         {
             FH_Process();
         }
         Basic->RX_Mode();
     }
-    else if(Basic->RF_State == Basic->State_RX)
+    else if (Basic->RF_State == Basic->State_RX)
     {
-        if(Basic->Recv(rxbuff))
+        if (Basic->Recv(rxbuff))
         {
             LastRxTime = millis();
             FH_Enable = true;
@@ -131,7 +131,7 @@ void NRF_FHSS::RxProcess(void* rxbuff, void* txbuff)
         }
         else
         {
-            if(millis() - LastRxTime >= InterruptTime * (FH_List_Length + 5))
+            if (millis() - LastRxTime >= InterruptTime * (FH_List_Length + 5))
             {
                 LastRxTime = millis();
                 FH_Process();

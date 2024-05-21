@@ -1,40 +1,40 @@
 #include "Basic/FileGroup.h"
 #include "ComPrivate.h"
 
-/*±»Ñ¡ÖĞµÄÑ¡Ïî*/
+/*è¢«é€‰ä¸­çš„é€‰é¡¹*/
 static int16_t ItemSelect = 0;
 
-/*¿ÉÑ¡Ñ¡Ïî×î´ó¸öÊı*/
+/*å¯é€‰é€‰é¡¹æœ€å¤§ä¸ªæ•°*/
 static uint8_t ItemSelect_MAX = 0;
 
 static void ConnectSetup()
 {
-    Com_SetEnable(false);//Ò£¿Ø¹Ø±Õ
+    Com_SetEnable(false); // é¥æ§å…³é—­
     ItemSelect_MAX = 0;
     ItemSelect = 0;
-    
-    /*ÅäÖÃ»ù±¾ĞÅÏ¢*/
-    RCX::Handshake::Pack_t* master = RCX::Handshake::GetMaster();
+
+    /*é…ç½®åŸºæœ¬ä¿¡æ¯*/
+    RCX::Handshake::Pack_t *master = RCX::Handshake::GetMaster();
     master->EnableFunction.Passback = CTRL.State->Passback;
     master->EnableFunction.FHSS = CTRL.State->FHSS;
     master->Speed = nrf.GetSpeed();
 
-    /*ÎÕÊÖ³õÊ¼»¯*/
+    /*æ¡æ‰‹åˆå§‹åŒ–*/
     RCX::Handshake::Init(&nrfTRM, &nrfFHSS);
-    
-    /*Ö÷»ú×¼±¸ÎÕÊÖ*/
+
+    /*ä¸»æœºå‡†å¤‡æ¡æ‰‹*/
     RCX::Handshake::Process(RCX::Handshake::State_Prepare);
-    
+
     Serial.println("Searching...");
-    /*³¬Ê±ÉèÖÃ*/
+    /*è¶…æ—¶è®¾ç½®*/
     uint32_t time = millis();
     uint8_t ItemSelect_MAX_Last = 0;
-    while(millis() - time < 5000)
+    while (millis() - time < 5000)
     {
-        /*»ñÈ¡´Ó»úÁĞ±íÊıÁ¿*/
+        /*è·å–ä»æœºåˆ—è¡¨æ•°é‡*/
         ItemSelect_MAX = RCX::Handshake::Process(RCX::Handshake::State_Search);
 
-        if(ItemSelect_MAX > ItemSelect_MAX_Last)
+        if (ItemSelect_MAX > ItemSelect_MAX_Last)
         {
             Serial.printf("Find %d Slave...\r\n", ItemSelect_MAX);
             ItemSelect_MAX_Last = ItemSelect_MAX;
@@ -42,30 +42,27 @@ static void ConnectSetup()
         }
     }
 
-    /*ÏÔÊ¾ËÑË÷½á¹û*/
+    /*æ˜¾ç¤ºæœç´¢ç»“æœ*/
     Serial.println(ItemSelect_MAX > 0 ? "Search Done!" : "Not Found!");
 }
 
 static void ConnectProcess()
 {
-    /*³¢ÊÔÁ¬½Ó´Ó»ú*/
+    /*å°è¯•è¿æ¥ä»æœº*/
     Serial.printf("Connecting %s...\r\n", RCX::Handshake::GetSlave(ItemSelect)->Description);
 
-    /*³¬Ê±ÉèÖÃ*/
+    /*è¶…æ—¶è®¾ç½®*/
     uint32_t timeout = millis();
     bool IsTimeout = false;
-    /*µÈ´ı´Ó»úÏìÓ¦ÎÕÊÖĞÅºÅ*/
-    while(
+    /*ç­‰å¾…ä»æœºå“åº”æ¡æ‰‹ä¿¡å·*/
+    while (
         RCX::Handshake::Process(
-            RCX::Handshake::State_ReqConnect, 
-            ItemSelect, 
-            RCX::Handshake::CMD_AttachConnect
-        ) 
-        != RCX::Handshake::CMD_AgreeConnect
-    )
+            RCX::Handshake::State_ReqConnect,
+            ItemSelect,
+            RCX::Handshake::CMD_AttachConnect) != RCX::Handshake::CMD_AgreeConnect)
     {
-        /*³¬Ê±*/
-        if(millis() - timeout > 1000)
+        /*è¶…æ—¶*/
+        if (millis() - timeout > 1000)
         {
             Serial.println("Timeout");
             IsTimeout = true;
@@ -73,11 +70,11 @@ static void ConnectProcess()
         }
     }
 
-    /*ÎÕÊÖÊÕÎ²ÉèÖÃ£¬Ìø×ªÖÁÔ¼¶¨ºÃµÄÎÕÊÖÆµÂÊÒÔ¼°µØÖ·*/
+    /*æ¡æ‰‹æ”¶å°¾è®¾ç½®ï¼Œè·³è½¬è‡³çº¦å®šå¥½çš„æ¡æ‰‹é¢‘ç‡ä»¥åŠåœ°å€*/
     RCX::Handshake::Process(RCX::Handshake::State_Connected);
 
-    /*Èç¹ûÎ´³¬Ê±±íÊ¾ÎÕÊÖ³É¹¦*/
-    if(!IsTimeout)
+    /*å¦‚æœæœªè¶…æ—¶è¡¨ç¤ºæ¡æ‰‹æˆåŠŸ*/
+    if (!IsTimeout)
     {
         Serial.println("Connect successfully");
     }
@@ -95,14 +92,14 @@ void Com_TestSetup()
     CTRL.State->Handshake = true;
     CTRL.State->FHSS = true;
     CTRL.State->Passback = false;
-    
-    if(Com_Init())
+
+    if (Com_Init())
     {
         Serial.println("RF init successful");
     }
     ConnectSetup();
     ConnectProcess();
-    
+
     nrf.SetRF_Enable(true);
     RCX::ChannelReset();
     Com_SetEnable(true);
@@ -112,11 +109,11 @@ static void Joystick_Update()
 {
     CTRL.JS_L.X.Val++;
     CTRL.JS_R.Y.Val++;
-    
-    if(CTRL.JS_L.X.Val > RCX_CHANNEL_DATA_MAX)
+
+    if (CTRL.JS_L.X.Val > RCX_CHANNEL_DATA_MAX)
         CTRL.JS_L.X.Val = -RCX_CHANNEL_DATA_MAX;
-    
-    if(CTRL.JS_R.Y.Val > RCX_CHANNEL_DATA_MAX)
+
+    if (CTRL.JS_R.Y.Val > RCX_CHANNEL_DATA_MAX)
         CTRL.JS_R.Y.Val = -RCX_CHANNEL_DATA_MAX;
 }
 

@@ -76,12 +76,12 @@ static void Com_TxRxProcess()
 {
     if (CTRL.State->FHSS)
     {
-        nrfFHSS.TxProcess(
-            NRF_TxBuff,
-            CTRL.State->Passback ? NRF_RxBuff : NULL);
+        // 如果设置了跳频 情况下也设置了回传 那么使用 NRF_RxBuff 地址作为接收地址
+        nrfFHSS.TxProcess(NRF_TxBuff, CTRL.State->Passback ? NRF_RxBuff : NULL);
     }
     else
     {
+        // 没有设置跳频
         nrfTRM.TranRecv(NRF_TxBuff, NRF_RxBuff);
     }
 
@@ -99,6 +99,7 @@ static void Com_TxRxProcess()
  */
 void Com_Update()
 {
+    // 如果开启了
     if (!Com_Enable)
         return;
 
@@ -109,15 +110,16 @@ void Com_Update()
 
     if (CTRL.State->FHSS || CTRL.State->Passback)
     {
+        // 如果设置了跳频 或者回传 的发送调用
         Com_TxRxProcess();
     }
     else
     {
-        if (nrf.GetRF_State() != nrf.State_TX)
+        if (nrf.GetRF_State() != nrf.State_TX) // 不是发送模式则设置为发送模式
         {
-            nrf.TX_Mode();
+            nrf.TX_Mode(); // 设置为发送模式
         }
-        nrf.TranCheck();
+        nrf.TranCheck();      // 检查发送状态
         nrf.Tran(NRF_TxBuff); // NRF发送数据
     }
 }

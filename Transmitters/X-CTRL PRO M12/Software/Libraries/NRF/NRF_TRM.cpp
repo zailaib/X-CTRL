@@ -1,16 +1,16 @@
 #include "NRF.h"
 
 /**
-  * @brief  ·¢ËÍ»º³åÇøÊý¾Ý,½ÓÊÕÊý¾Ýµ½½ÓÊÕ»º³åÇø(°ëË«¹¤Í¨ÐÅ£¬ÓÃÓÚÖ÷»ú£¬ÊÊÓÃÓÚÐÅºÅ½Ï²îµÄ»·¾³)
-  * @param  *txbuff:·¢ËÍ»º³åÇøµØÖ·
-  * @param  *rxbuff:½ÓÊÕ»º³åÇøµØÖ·
-  * @retval ÎÞ
-  */
-void NRF_TRM::TranRecv(void* txbuff, void* rxbuff)
+ * @brief  å‘é€ç¼“å†²åŒºæ•°æ®,æŽ¥æ”¶æ•°æ®åˆ°æŽ¥æ”¶ç¼“å†²åŒº(åŠåŒå·¥é€šä¿¡ï¼Œç”¨äºŽä¸»æœºï¼Œé€‚ç”¨äºŽä¿¡å·è¾ƒå·®çš„çŽ¯å¢ƒ)
+ * @param  *txbuff:å‘é€ç¼“å†²åŒºåœ°å€
+ * @param  *rxbuff:æŽ¥æ”¶ç¼“å†²åŒºåœ°å€
+ * @retval æ— 
+ */
+void NRF_TRM::TranRecv(void *txbuff, void *rxbuff)
 {
-    if(Basic->RF_State == Basic->State_TX)
+    if (Basic->RF_State == Basic->State_TX)
     {
-        if(Basic->TranCheck() > 0)
+        if (Basic->TranCheck() > 0)
         {
             Basic->RX_Mode();
         }
@@ -20,7 +20,7 @@ void NRF_TRM::TranRecv(void* txbuff, void* rxbuff)
             Basic->Tran(txbuff);
         }
     }
-    else if(Basic->RF_State == Basic->State_RX)
+    else if (Basic->RF_State == Basic->State_RX)
     {
         Basic->Recv(rxbuff);
         Basic->TX_Mode();
@@ -29,17 +29,17 @@ void NRF_TRM::TranRecv(void* txbuff, void* rxbuff)
 }
 
 /**
-  * @brief  ½ÓÊÕÊý¾Ýµ½½ÓÊÕ»º³åÇø,·¢ËÍ»º³åÇøÊý¾Ý(°ëË«¹¤Í¨ÐÅ£¬ÓÃÓÚ´Ó»ú£¬ÊÊÓÃÓÚÐÅºÅ½Ï²îµÄ»·¾³)
-  * @param  *rxbuff:½ÓÊÕ»º³åÇøµØÖ·
-  * @param  *txbuff:·¢ËÍ»º³åÇøµØÖ·
-  * @retval ÎÞ
-  */
-void NRF_TRM::RecvTran(void* rxbuff, void* txbuff)
+ * @brief  æŽ¥æ”¶æ•°æ®åˆ°æŽ¥æ”¶ç¼“å†²åŒº,å‘é€ç¼“å†²åŒºæ•°æ®(åŠåŒå·¥é€šä¿¡ï¼Œç”¨äºŽä»Žæœºï¼Œé€‚ç”¨äºŽä¿¡å·è¾ƒå·®çš„çŽ¯å¢ƒ)
+ * @param  *rxbuff:æŽ¥æ”¶ç¼“å†²åŒºåœ°å€
+ * @param  *txbuff:å‘é€ç¼“å†²åŒºåœ°å€
+ * @retval æ— 
+ */
+void NRF_TRM::RecvTran(void *rxbuff, void *txbuff)
 {
     uint8_t status = Basic->GetStatus();
-    if(Basic->RF_State == Basic->State_RX)
+    if (Basic->RF_State == Basic->State_RX)
     {
-        if(Basic->Recv(rxbuff))
+        if (Basic->Recv(rxbuff))
         {
             Basic->TX_Mode();
             Basic->Tran(txbuff);
@@ -49,9 +49,9 @@ void NRF_TRM::RecvTran(void* rxbuff, void* txbuff)
             Basic->RX_Mode();
         }
     }
-    else if(Basic->RF_State == Basic->State_TX)
+    else if (Basic->RF_State == Basic->State_TX)
     {
-        if(status & Basic->TX_DS)
+        if (status & Basic->TX_DS)
         {
             Basic->RF_TranSuccessCnt++;
         }

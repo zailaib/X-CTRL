@@ -66,7 +66,7 @@ void X_CTRL_SetDefault()
  */
 void X_CTRL_Init()
 {
-    Serial.begin(115200);
+    Serial.begin(115200); // 串口通信波特率设置
     DEBUG_FUNC_LOG();
 
     I2C_Scan(false);
