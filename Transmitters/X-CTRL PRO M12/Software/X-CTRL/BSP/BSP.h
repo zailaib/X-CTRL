@@ -6,7 +6,7 @@
 #include "Basic/XC_Type.h"
 #include "Arduino.h"
 
-#define DEBUG_FUNC_LOG() Serial.printf("%s (%0.3fms)\r\n", __FUNCTION__, micros()/1000.0f)
+#define DEBUG_FUNC_LOG() Serial.printf("%s (%0.3fms)\r\n", __FUNCTION__, micros() / 1000.0f)
 
 /*Backlight*/
 uint16_t Backlight_GetValue();
@@ -15,7 +15,8 @@ void Backlight_SetGradual(uint16_t target, uint16_t time = 500);
 
 /*Buttons*/
 #include "ButtonEvent/ButtonEvent.h"
-enum{
+enum
+{
     BTN_IDX_UP,
     BTN_IDX_DOWN,
     BTN_IDX_OK,
@@ -25,20 +26,21 @@ enum{
     BTN_IDX_POWER,
     BTN_IDX_MAX
 };
-extern ButtonEvent  btGrp[BTN_IDX_MAX];
-#define btUP       (btGrp[BTN_IDX_UP])
-#define btDOWN     (btGrp[BTN_IDX_DOWN])
-#define btOK       (btGrp[BTN_IDX_OK])
-#define btBACK     (btGrp[BTN_IDX_BACK])
-#define btUPL      (btGrp[BTN_IDX_UPL])
-#define btDOWNL    (btGrp[BTN_IDX_DOWNL])
-#define btPOWER    (btGrp[BTN_IDX_POWER])
+extern ButtonEvent btGrp[BTN_IDX_MAX];
+#define btUP (btGrp[BTN_IDX_UP])
+#define btDOWN (btGrp[BTN_IDX_DOWN])
+#define btOK (btGrp[BTN_IDX_OK])
+#define btBACK (btGrp[BTN_IDX_BACK])
+#define btUPL (btGrp[BTN_IDX_UPL])
+#define btDOWNL (btGrp[BTN_IDX_DOWNL])
+#define btPOWER (btGrp[BTN_IDX_POWER])
 void Button_Init();
 void Button_Update();
 
 /*Switch*/
 #include "SwitchEvent/SwitchEvent.h"
-enum{
+enum
+{
     SW_IDX_E,
     SW_IDX_F,
     SW_IDX_G,
@@ -53,23 +55,24 @@ extern SwitchEvent swGrp[SW_IDX_MAX];
 void Switch_Init();
 void Switch_Update(uint16_t swVal);
 
-
 /*Audio*/
-namespace MC_Type {
-typedef enum {
-    MC_StartUp,
-    MC_Error,
-    MC_Connect,
-    MC_Disconnect,
-    MC_UnstableConnect,
-    MC_BattChargeStart,
-    MC_BattChanargeEnd,
-    MC_DeviceInsert,
-    MC_DevicePullout,
-    MC_NoOperationWarning,
-    MC_Astronomia,
-    MC_MAX
-}MusicCode_ID_Type;
+namespace MC_Type
+{
+    typedef enum
+    {
+        MC_StartUp,
+        MC_Error,
+        MC_Connect,
+        MC_Disconnect,
+        MC_UnstableConnect,
+        MC_BattChargeStart,
+        MC_BattChanargeEnd,
+        MC_DeviceInsert,
+        MC_DevicePullout,
+        MC_NoOperationWarning,
+        MC_Astronomia,
+        MC_MAX
+    } MusicCode_ID_Type;
 }
 void Audio_Init();
 void Audio_Update();
@@ -80,8 +83,8 @@ void Audio_Tone(uint32_t freq, uint32_t time);
 void Joystick_Init();
 void Joystick_Update();
 void Joystick_SetDefault();
-void Joystick_SetCurve(XC_Joystick_TypeDef* js, float startK, float endK);
-void Joystick_GetCurve(XC_Joystick_TypeDef* js, int16_t* points, uint32_t size);
+void Joystick_SetCurve(XC_Joystick_TypeDef *js, float startK, float endK);
+void Joystick_GetCurve(XC_Joystick_TypeDef *js, int16_t *points, uint32_t size);
 
 /*IMU*/
 void IMU_Init();
@@ -101,7 +104,7 @@ bool I2C_GetLocked();
 
 /*Power*/
 void Power_Init();
-void Power_GetInfo(float* battCurrent,float* battVoltage,float* battVoltageOc);
+void Power_GetInfo(float *battCurrent, float *battVoltage, float *battVoltageOc);
 float Power_GetBattUsage();
 void Power_Update();
 void Power_Shutdown();

@@ -103,7 +103,7 @@ static uint16_t Button_GetHC165Value()
 
 void Button_Update()
 {
-    uint16_t ButtonVal = Button_GetHC165Value();
+    uint16_t ButtonVal = Button_GetHC165Value(); // 获取HC165芯片的按钮状态或值
 
     btUP.EventMonitor(bool(ButtonVal & BTN_R_UP1));
     btDOWN.EventMonitor(bool(ButtonVal & BTN_R_DOWN2));
